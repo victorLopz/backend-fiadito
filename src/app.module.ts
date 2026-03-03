@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthService } from './modules/auth/application/use-cases/auth.service';
 import { DebtsService } from './modules/debts/application/use-cases/debts.service';
@@ -15,7 +16,7 @@ import { TYPEORM_ENTITIES } from './shared/infrastructure/persistence/entities';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 10 }]),
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 120 }]),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -32,6 +33,15 @@ import { TYPEORM_ENTITIES } from './shared/infrastructure/persistence/entities';
     }),
   ],
   controllers: [AuthController, InventoryController, SalesController, DebtsController],
-  providers: [AuthService, InventoryService, SalesService, DebtsService],
+  providers: [
+    AuthService,
+    InventoryService,
+    SalesService,
+    DebtsService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

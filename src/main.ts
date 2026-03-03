@@ -1,7 +1,6 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import helmet from 'helmet';
-import { ThrottlerGuard } from '@nestjs/throttler';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -17,7 +16,6 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     }),
   );
-  // app.useGlobalGuards(app.get(ThrottlerGuard));
 
   await app.listen(Number(process.env.PORT ?? 3000));
 }
