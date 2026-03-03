@@ -7,18 +7,18 @@ export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
   @Post()
-  create(@Body() dto: Record<string, unknown>, @BusinessId() businessId: string, @CurrentUser() user: any) {
+  create(@Body() dto: Record<string, unknown>, @BusinessId() businessId: string, @CurrentUser() user: { id?: string } | undefined) {
     return this.inventoryService.createProduct(dto, businessId, user?.id ?? 'system');
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: Record<string, unknown>) {
-    return this.inventoryService.updateProduct({ ...dto, id });
+  update(@Param('id') id: string, @Body() dto: Record<string, unknown>, @BusinessId() businessId: string) {
+    return this.inventoryService.updateProduct({ ...dto, id }, businessId);
   }
 
   @Patch(':id/deactivate')
-  deactivate(@Param('id') id: string) {
-    return this.inventoryService.deactivateProduct(id);
+  deactivate(@Param('id') id: string, @BusinessId() businessId: string) {
+    return this.inventoryService.deactivateProduct(id, businessId);
   }
 
   @Get('low-stock')
