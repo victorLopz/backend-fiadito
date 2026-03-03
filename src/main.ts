@@ -17,7 +17,7 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     }),
   );
-  app.useGlobalGuards(app.get(ThrottlerGuard));
+  // app.useGlobalGuards(app.get(ThrottlerGuard));
 
   await app.listen(Number(process.env.PORT ?? 3000));
 }
