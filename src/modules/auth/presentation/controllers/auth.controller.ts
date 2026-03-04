@@ -38,8 +38,8 @@ export class AuthController {
 
   @Post("login")
   @Throttle({ default: { limit: 5, ttl: 60000 } })
-  login(@Body() body: { phone: string; password: string }) {
-    return this.authService.loginWithPhone(body.phone, body.password)
+  login(@Body() body: { destinationMobile: string; password: string }) {
+    return this.authService.loginWithPhone(body.destinationMobile, body.password)
   }
 
   @Post("refresh")
