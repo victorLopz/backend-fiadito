@@ -1,23 +1,18 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException
-} from "@nestjs/common";
-import { CreateProductDto } from "../dto/create-product.dto";
-import { ListLowStockQueryDto } from "../dto/list-low-stock-query.dto";
-import { ListProductsQueryDto } from "../dto/list-products-query.dto";
-import { UpdateProductDto } from "../dto/update-product.dto";
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common"
+import { CreateProductDto } from "../dto/create-product.dto"
+import { ListLowStockQueryDto } from "../dto/list-low-stock-query.dto"
+import { ListProductsQueryDto } from "../dto/list-products-query.dto"
+import { UpdateProductDto } from "../dto/update-product.dto"
 import {
   INVENTORY_MOVEMENT_REPOSITORY,
   InventoryMovementRepository
-} from "src/modules/inventory/domain/repositories/inventory-movement.repository";
+} from "src/modules/inventory/domain/repositories/inventory-movement.repository"
 import {
   PRODUCT_REPOSITORY,
   ProductRepository
-} from "src/modules/inventory/domain/repositories/product.repository";
-import { InventoryMovementType } from "src/shared/infrastructure/persistence/entities/enums";
-import { ProductTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/product.typeorm-entity";
+} from "src/modules/inventory/domain/repositories/product.repository"
+import { InventoryMovementType } from "src/shared/infrastructure/persistence/entities/enums"
+import { ProductTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/product.typeorm-entity"
 
 @Injectable()
 export class InventoryService {
@@ -34,10 +29,10 @@ export class InventoryService {
     userId: string
   ): Promise<Record<string, unknown>> {
     if (!businessId) {
-      throw new BadRequestException("businessId is required");
+      throw new BadRequestException("businessId is required")
     }
 
-    const initialStock = dto.initialStock ?? 0;
+    const initialStock = dto.initialStock ?? 0
 
     const product = await this.productRepository.create({
       businessId,
@@ -49,7 +44,7 @@ export class InventoryService {
       stockCurrent: initialStock,
       stockMin: dto.stockMin ?? 0,
       createdBy: userId || "system"
-    });
+    })
 
     if (initialStock > 0) {
       await this.inventoryMovementRepository.create({
@@ -59,7 +54,7 @@ export class InventoryService {
         quantity: initialStock,
         reason: `INITIAL_STOCK by ${userId || "system"}`,
         createdBy: userId || "system"
-      });
+      })
     }
 
     return {
@@ -76,7 +71,7 @@ export class InventoryService {
       createdBy: product.createdBy,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt
-    };
+    }
   }
 
   async listProducts(
@@ -84,7 +79,7 @@ export class InventoryService {
     query: ListProductsQueryDto
   ): Promise<Record<string, unknown>> {
     if (!businessId) {
-      throw new BadRequestException("businessId is required");
+      throw new BadRequestException("businessId is required")
     }
 
     if (
@@ -92,11 +87,11 @@ export class InventoryService {
       query.maxCost !== undefined &&
       query.minCost > query.maxCost
     ) {
-      throw new BadRequestException("minCost cannot be greater than maxCost");
+      throw new BadRequestException("minCost cannot be greater than maxCost")
     }
 
-    const page = query.page ?? 1;
-    const limit = query.limit ?? 20;
+    const page = query.page ?? 1
+    const limit = query.limit ?? 20
 
     const { items, total } = await this.productRepository.findPaginated({
       businessId,
@@ -105,7 +100,7 @@ export class InventoryService {
       name: query.name,
       minCost: query.minCost,
       maxCost: query.maxCost
-    });
+    })
 
     const data = items.map((row) => ({
       id: row.id,
@@ -121,7 +116,7 @@ export class InventoryService {
       createdBy: row.createdBy,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt
-    }));
+    }))
 
     return {
       data,
@@ -129,61 +124,51 @@ export class InventoryService {
       limit,
       total,
       totalPages: Math.ceil(total / limit)
-    };
+    }
   }
 
-  async updateProduct(
-    id: string,
-    dto: UpdateProductDto,
-    businessId: string
-  ): Promise<void> {
+  async updateProduct(id: string, dto: UpdateProductDto, businessId: string): Promise<void> {
     if (!businessId) {
-      throw new BadRequestException("businessId is required");
+      throw new BadRequestException("businessId is required")
     }
 
-    const product = await this.productRepository.findById(id, businessId);
+    const product = await this.productRepository.findById(id, businessId)
     if (!product) {
-      throw new NotFoundException("Product not found");
+      throw new NotFoundException("Product not found")
     }
 
-    const updatePayload: Partial<ProductTypeOrmEntity> = {};
+    const updatePayload: Partial<ProductTypeOrmEntity> = {}
 
     if (dto.sku !== undefined) {
-      updatePayload.sku = dto.sku;
+      updatePayload.sku = dto.sku
     }
     if (dto.name !== undefined) {
-      updatePayload.name = dto.name;
+      updatePayload.name = dto.name
     }
     if (dto.barcode !== undefined) {
-      updatePayload.barcode = dto.barcode;
+      updatePayload.barcode = dto.barcode
     }
     if (dto.price !== undefined) {
-      updatePayload.price = this.toMoney(dto.price);
+      updatePayload.price = this.toMoney(dto.price)
     }
     if (dto.cost !== undefined) {
-      updatePayload.cost = this.toMoney(dto.cost);
+      updatePayload.cost = this.toMoney(dto.cost)
     }
     if (dto.stockMin !== undefined) {
-      updatePayload.stockMin = dto.stockMin;
+      updatePayload.stockMin = dto.stockMin
     }
 
-    await this.productRepository.update(id, businessId, updatePayload);
+    await this.productRepository.update(id, businessId, updatePayload)
   }
 
-  async deactivateProduct(
-    productId: string,
-    businessId: string
-  ): Promise<void> {
+  async deactivateProduct(productId: string, businessId: string): Promise<void> {
     if (!productId || !businessId) {
-      throw new BadRequestException("productId and businessId are required");
+      throw new BadRequestException("productId and businessId are required")
     }
 
-    const deactivated = await this.productRepository.deactivate(
-      productId,
-      businessId
-    );
+    const deactivated = await this.productRepository.deactivate(productId, businessId)
     if (!deactivated) {
-      throw new NotFoundException("Product not found");
+      throw new NotFoundException("Product not found")
     }
   }
 
@@ -192,18 +177,18 @@ export class InventoryService {
     query: ListLowStockQueryDto
   ): Promise<Record<string, unknown>> {
     if (!businessId) {
-      throw new BadRequestException("businessId is required");
+      throw new BadRequestException("businessId is required")
     }
 
-    const page = query.page ?? 1;
-    const limit = query.limit ?? 20;
+    const page = query.page ?? 1
+    const limit = query.limit ?? 20
 
     const { items, total } = await this.productRepository.findLowStockPaginated({
       businessId,
       page,
       limit,
       name: query.name
-    });
+    })
 
     const data = items.map((row) => ({
       id: row.id,
@@ -215,7 +200,7 @@ export class InventoryService {
       stockMin: row.stockMin,
       price: Number(row.price),
       cost: Number(row.cost)
-    }));
+    }))
 
     return {
       data,
@@ -223,10 +208,10 @@ export class InventoryService {
       limit,
       total,
       totalPages: Math.ceil(total / limit)
-    };
+    }
   }
 
   private toMoney(amount: number): string {
-    return amount.toFixed(2);
+    return amount.toFixed(2)
   }
 }

@@ -7,8 +7,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   JoinColumn
-} from "typeorm";
-import { BusinessTypeOrmEntity } from "./business.typeorm-entity";
+} from "typeorm"
+import { BusinessTypeOrmEntity } from "./business.typeorm-entity"
 
 @Entity("users")
 @Index(["businessId", "email"], { unique: true })
@@ -18,36 +18,36 @@ export class UserTypeOrmEntity {
      PRIMARY KEY
   ================================= */
   @PrimaryGeneratedColumn("uuid")
-  id!: string;
+  id!: string
 
   /* ================================
      RELATIONSHIP (TENANT / BUSINESS)
   ================================= */
   @Column({ type: "uuid", name: "business_id" })
-  businessId!: string;
+  businessId!: string
 
   @ManyToOne(() => BusinessTypeOrmEntity, { onDelete: "CASCADE" })
   @JoinColumn({ name: "business_id" })
-  business!: BusinessTypeOrmEntity;
+  business!: BusinessTypeOrmEntity
 
   /* ================================
      BASIC INFORMATION
   ================================= */
   @Column({ name: "full_name", type: "varchar" })
-  fullName!: string;
+  fullName!: string
 
   @Column({ type: "varchar", nullable: true })
-  email?: string;
+  email?: string
 
   @Column({ name: "phone_e164", type: "varchar", nullable: true })
-  phoneE164?: string;
+  phoneE164?: string
 
   @Column({
     name: "password_hash",
     type: "text",
     nullable: true // solo cuando provider = LOCAL
   })
-  passwordHash?: string;
+  passwordHash?: string
 
   /* ================================
      VERIFICATION
@@ -57,14 +57,14 @@ export class UserTypeOrmEntity {
     type: "timestamptz",
     nullable: true
   })
-  emailVerifiedAt?: Date;
+  emailVerifiedAt?: Date
 
   @Column({
     name: "phone_verified_at",
     type: "timestamptz",
     nullable: true
   })
-  phoneVerifiedAt?: Date;
+  phoneVerifiedAt?: Date
 
   /* ================================
      SECURITY
@@ -74,21 +74,21 @@ export class UserTypeOrmEntity {
     type: "int",
     default: 0
   })
-  failedLoginAttempts!: number;
+  failedLoginAttempts!: number
 
   @Column({
     name: "locked_until",
     type: "timestamptz",
     nullable: true
   })
-  lockedUntil?: Date;
+  lockedUntil?: Date
 
   @Column({
     name: "last_login_at",
     type: "timestamptz",
     nullable: true
   })
-  lastLoginAt?: Date;
+  lastLoginAt?: Date
 
   /* ================================
      STATUS
@@ -98,7 +98,7 @@ export class UserTypeOrmEntity {
     type: "boolean",
     default: true
   })
-  isActive!: boolean;
+  isActive!: boolean
 
   /* ================================
      AUDIT
@@ -107,11 +107,11 @@ export class UserTypeOrmEntity {
     name: "created_at",
     type: "timestamptz"
   })
-  createdAt!: Date;
+  createdAt!: Date
 
   @UpdateDateColumn({
     name: "updated_at",
     type: "timestamptz"
   })
-  updatedAt!: Date;
+  updatedAt!: Date
 }

@@ -1,9 +1,9 @@
-import { Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { IsNull, Repository } from "typeorm";
-import { TokenRepository } from "src/modules/auth/domain/repositories/token.repository";
-import { AuthTokenTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/auth-token.typeorm-entity";
-import { TokenType } from "src/shared/infrastructure/persistence/entities/enums";
+import { Injectable } from "@nestjs/common"
+import { InjectRepository } from "@nestjs/typeorm"
+import { IsNull, Repository } from "typeorm"
+import { TokenRepository } from "src/modules/auth/domain/repositories/token.repository"
+import { AuthTokenTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/auth-token.typeorm-entity"
+import { TokenType } from "src/shared/infrastructure/persistence/entities/enums"
 
 @Injectable()
 export class TypeOrmTokenRepository implements TokenRepository {
@@ -13,10 +13,10 @@ export class TypeOrmTokenRepository implements TokenRepository {
   ) {}
 
   async saveRefreshTokenHash(input: {
-    businessId: string;
-    userId: string;
-    tokenHash: string;
-    expiresAt: Date;
+    businessId: string
+    userId: string
+    tokenHash: string
+    expiresAt: Date
   }): Promise<AuthTokenTypeOrmEntity> {
     return this.repository.save(
       this.repository.create({
@@ -27,22 +27,20 @@ export class TypeOrmTokenRepository implements TokenRepository {
         tokenHash: input.tokenHash,
         expiresAt: input.expiresAt
       })
-    );
+    )
   }
 
-  async findActiveRefreshTokenById(
-    tokenId: string
-  ): Promise<AuthTokenTypeOrmEntity | null> {
+  async findActiveRefreshTokenById(tokenId: string): Promise<AuthTokenTypeOrmEntity | null> {
     return this.repository.findOne({
       where: {
         id: tokenId,
         type: TokenType.REFRESH,
         revokedAt: IsNull()
       }
-    });
+    })
   }
 
   async revokeToken(tokenId: string): Promise<void> {
-    await this.repository.update({ id: tokenId }, { revokedAt: new Date() });
+    await this.repository.update({ id: tokenId }, { revokedAt: new Date() })
   }
 }

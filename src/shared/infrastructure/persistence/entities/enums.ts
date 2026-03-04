@@ -1,34 +1,34 @@
 export enum UserRole {
-  OWNER = 'OWNER',
-  ADMIN = 'ADMIN',
-  CASHIER = 'CASHIER',
+  OWNER = "OWNER",
+  ADMIN = "ADMIN",
+  CASHIER = "CASHIER"
 }
 
 export enum SaleType {
-  CASH = 'CASH',
-  CREDIT = 'CREDIT',
+  CASH = "CASH",
+  CREDIT = "CREDIT"
 }
 
 export enum DebtStatus {
-  OPEN = 'OPEN',
-  PARTIAL = 'PARTIAL',
-  PAID = 'PAID',
-  CANCELLED = 'CANCELLED',
+  OPEN = "OPEN",
+  PARTIAL = "PARTIAL",
+  PAID = "PAID",
+  CANCELLED = "CANCELLED"
 }
 
 export enum TokenType {
-  REFRESH = 'REFRESH',
-  RESET_PASSWORD = 'RESET_PASSWORD',
+  REFRESH = "REFRESH",
+  RESET_PASSWORD = "RESET_PASSWORD"
 }
 
 export enum OtpPurpose {
-  LOGIN = 'LOGIN',
-  PASSWORD_RESET = 'PASSWORD_RESET',
-  PHONE_VERIFICATION = 'PHONE_VERIFICATION',
+  LOGIN = "LOGIN",
+  PASSWORD_RESET = "PASSWORD_RESET",
+  PHONE_VERIFICATION = "PHONE_VERIFICATION"
 }
 
 export enum InventoryMovementType {
-  IN = 'IN',
-  OUT = 'OUT',
-  ADJUSTMENT = 'ADJUSTMENT',
+  IN = "IN",
+  OUT = "OUT",
+  ADJUSTMENT = "ADJUSTMENT"
 }

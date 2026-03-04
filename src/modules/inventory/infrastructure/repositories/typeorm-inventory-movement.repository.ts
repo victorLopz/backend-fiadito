@@ -1,9 +1,9 @@
-import { Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { InventoryMovementRepository } from "src/modules/inventory/domain/repositories/inventory-movement.repository";
-import { InventoryMovementType } from "src/shared/infrastructure/persistence/entities/enums";
-import { InventoryMovementTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/inventory-movement.typeorm-entity";
+import { Injectable } from "@nestjs/common"
+import { InjectRepository } from "@nestjs/typeorm"
+import { Repository } from "typeorm"
+import { InventoryMovementRepository } from "src/modules/inventory/domain/repositories/inventory-movement.repository"
+import { InventoryMovementType } from "src/shared/infrastructure/persistence/entities/enums"
+import { InventoryMovementTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/inventory-movement.typeorm-entity"
 
 @Injectable()
 export class TypeOrmInventoryMovementRepository implements InventoryMovementRepository {
@@ -13,12 +13,12 @@ export class TypeOrmInventoryMovementRepository implements InventoryMovementRepo
   ) {}
 
   async create(input: {
-    businessId: string;
-    productId: string;
-    type: InventoryMovementType;
-    quantity: number;
-    reason?: string;
-    createdBy: string;
+    businessId: string
+    productId: string
+    type: InventoryMovementType
+    quantity: number
+    reason?: string
+    createdBy: string
   }): Promise<void> {
     await this.repository.save(
       this.repository.create({
@@ -30,6 +30,6 @@ export class TypeOrmInventoryMovementRepository implements InventoryMovementRepo
         createdBy: input.createdBy,
         createdAt: new Date()
       })
-    );
+    )
   }
 }

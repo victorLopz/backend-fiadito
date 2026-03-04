@@ -1,29 +1,36 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn
+} from "typeorm"
 
-@Entity('clients')
-@Index(['businessId', 'phone'])
+@Entity("clients")
+@Index(["businessId", "phone"])
 export class ClientTypeOrmEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  @PrimaryGeneratedColumn("uuid")
+  id!: string
 
-  @Column('uuid')
-  businessId!: string;
+  @Column("uuid")
+  businessId!: string
 
   @Column()
-  fullName!: string;
+  fullName!: string
 
   @Column({ nullable: true })
-  phone?: string;
+  phone?: string
 
   @Column({ nullable: true })
-  email?: string;
+  email?: string
 
   @Column({ default: true })
-  isActive!: boolean;
+  isActive!: boolean
 
-  @CreateDateColumn({ type: 'timestamptz' })
-  createdAt!: Date;
+  @CreateDateColumn({ type: "timestamptz" })
+  createdAt!: Date
 
-  @UpdateDateColumn({ type: 'timestamptz' })
-  updatedAt!: Date;
+  @UpdateDateColumn({ type: "timestamptz" })
+  updatedAt!: Date
 }

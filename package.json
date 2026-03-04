@@ -7,6 +7,8 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier --write src",
     "test": "jest",
     "migration:generate": "typeorm-ts-node-commonjs -d typeorm.datasource.ts migration:generate src/database/migrations/AutoMigration",
     "migration:create": "typeorm-ts-node-commonjs -d typeorm.datasource.ts migration:create src/database/migrations/ManualMigration",
@@ -25,16 +27,17 @@
     "argon2": "^0.41.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "dotenv": "^16.4.5",
     "helmet": "^7.1.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.12.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "typeorm": "^0.3.20",
-    "dotenv": "^16.4.5"
+    "typeorm": "^0.3.20"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@nestjs/cli": "^10.4.5",
     "@nestjs/schematics": "^10.1.4",
     "@nestjs/testing": "^10.4.2",
@@ -48,6 +51,7 @@
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "typeorm-ts-node-commonjs": "^0.3.20",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.2",
+    "typescript-eslint": "^8.56.1"
   }
 }

@@ -1,21 +1,21 @@
-import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { Type } from "class-transformer"
+import { IsInt, IsOptional, IsString, Max, Min } from "class-validator"
 
 export class ListLowStockQueryDto {
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  page?: number;
+  page?: number
 
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   @Max(100)
-  limit?: number;
+  limit?: number
 
   @IsOptional()
   @IsString()
-  name?: string;
+  name?: string
 }

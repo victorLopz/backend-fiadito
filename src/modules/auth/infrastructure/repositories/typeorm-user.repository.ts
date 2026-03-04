@@ -1,9 +1,9 @@
-import { Injectable } from "@nestjs/common";
-import { Repository } from "typeorm";
-import { InjectRepository } from "@nestjs/typeorm";
-import { UserRepository } from "src/modules/auth/domain/repositories/user.repository";
-import { UserRole } from "src/shared/infrastructure/persistence/entities/enums";
-import { UserTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/user.typeorm-entity";
+import { Injectable } from "@nestjs/common"
+import { Repository } from "typeorm"
+import { InjectRepository } from "@nestjs/typeorm"
+import { UserRepository } from "src/modules/auth/domain/repositories/user.repository"
+import { UserRole } from "src/shared/infrastructure/persistence/entities/enums"
+import { UserTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/user.typeorm-entity"
 
 @Injectable()
 export class TypeOrmUserRepository implements UserRepository {
@@ -13,23 +13,23 @@ export class TypeOrmUserRepository implements UserRepository {
   ) {}
 
   async existsByPhone(phone: string): Promise<boolean> {
-    const user = await this.repository.findOne({ where: { phoneE164: phone } });
-    return !!user;
+    const user = await this.repository.findOne({ where: { phoneE164: phone } })
+    return !!user
   }
 
   async existsByEmail(email: string): Promise<boolean> {
-    const user = await this.repository.findOne({ where: { email } });
-    return !!user;
+    const user = await this.repository.findOne({ where: { email } })
+    return !!user
   }
 
   async create(input: {
-    id: string;
-    businessId: string;
-    fullName: string;
-    email?: string;
-    phone?: string;
-    passwordHash: string;
-    role: UserRole;
+    id: string
+    businessId: string
+    fullName: string
+    email?: string
+    phone?: string
+    passwordHash: string
+    role: UserRole
   }): Promise<UserTypeOrmEntity> {
     return this.repository.save(
       this.repository.create({
@@ -42,13 +42,13 @@ export class TypeOrmUserRepository implements UserRepository {
         isActive: true,
         ...(input.role && { role: input.role })
       })
-    );
+    )
   }
 
   async findActiveByPhone(phone: string): Promise<UserTypeOrmEntity | null> {
     return this.repository.findOne({
       where: { phoneE164: phone, isActive: true }
-    });
+    })
   }
 
   async findActiveByIdAndBusiness(
@@ -57,6 +57,6 @@ export class TypeOrmUserRepository implements UserRepository {
   ): Promise<UserTypeOrmEntity | null> {
     return this.repository.findOne({
       where: { id, businessId, isActive: true }
-    });
+    })
   }
 }

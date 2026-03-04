@@ -1,26 +1,26 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn } from "typeorm"
 
-@Entity('whatsapp_message_logs')
-@Index(['businessId', 'destination', 'createdAt'])
+@Entity("whatsapp_message_logs")
+@Index(["businessId", "destination", "createdAt"])
 export class WhatsappMessageLogTypeOrmEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  @PrimaryGeneratedColumn("uuid")
+  id!: string
 
-  @Column('uuid')
-  businessId!: string;
-
-  @Column()
-  destination!: string;
+  @Column("uuid")
+  businessId!: string
 
   @Column()
-  templateCode!: string;
+  destination!: string
 
-  @Column({ default: 'PENDING' })
-  status!: string;
+  @Column()
+  templateCode!: string
 
-  @Column({ type: 'jsonb', nullable: true })
-  payload?: Record<string, unknown>;
+  @Column({ default: "PENDING" })
+  status!: string
 
-  @CreateDateColumn({ type: 'timestamptz' })
-  createdAt!: Date;
+  @Column({ type: "jsonb", nullable: true })
+  payload?: Record<string, unknown>
+
+  @CreateDateColumn({ type: "timestamptz" })
+  createdAt!: Date
 }
