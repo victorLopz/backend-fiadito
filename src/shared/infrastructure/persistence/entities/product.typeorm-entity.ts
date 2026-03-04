@@ -1,13 +1,20 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn
+} from "typeorm";
 
-@Entity('products')
-@Index(['businessId', 'sku'], { unique: true })
-@Index(['businessId', 'isActive'])
+@Entity("products")
+@Index(["businessId", "sku"], { unique: true })
+@Index(["businessId", "isActive"])
 export class ProductTypeOrmEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column('uuid')
+  @Column("uuid", { name: "business_id" })
   businessId!: string;
 
   @Column({ length: 64 })
@@ -16,27 +23,33 @@ export class ProductTypeOrmEntity {
   @Column({ length: 150 })
   name!: string;
 
-  @Column({ type: 'numeric', precision: 14, scale: 2 })
+  // barcode
+  @Column({ length: 64, nullable: true })
+  barcode?: string;
+
+  @Column({ type: "numeric", precision: 14, scale: 2 })
   price!: string;
 
-  @Column({ type: 'numeric', precision: 14, scale: 2 })
+  @Column({ type: "numeric", precision: 14, scale: 2 })
   cost!: string;
 
-  @Column({ type: 'int', default: 0 })
-  stock!: number;
+  @Column({ type: "int", default: 0, name: "stock_current" })
+  stockCurrent!: number;
 
-  @Column({ default: false })
-  allowNegativeStock!: boolean;
+  // stockMin
+  @Column({ type: "int", default: 0, name: "stock_min" })
+  stockMin!: number;
 
-  @Column({ type: 'int', default: 5 })
-  lowStockThreshold!: number;
-
-  @Column({ default: true })
+  @Column({ default: true, name: "is_active" })
   isActive!: boolean;
 
-  @CreateDateColumn({ type: 'timestamptz' })
+  // created_by
+  @Column({ length: 64, name: "created_by" })
+  createdBy!: string;
+
+  @CreateDateColumn({ type: "timestamptz", name: "created_at" })
   createdAt!: Date;
 
-  @UpdateDateColumn({ type: 'timestamptz' })
+  @UpdateDateColumn({ type: "timestamptz", name: "updated_at" })
   updatedAt!: Date;
 }

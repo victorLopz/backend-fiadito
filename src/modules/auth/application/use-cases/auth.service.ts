@@ -80,6 +80,7 @@ export class AuthService {
   private readonly accessExpiresInSeconds = 900;
   private readonly refreshTtlMs = 30 * 24 * 60 * 60 * 1000;
   private readonly loginByOtpEnabled: boolean;
+  private readonly accessTokenSecret: string;
 
   constructor(
     @Inject(USER_REPOSITORY)
@@ -96,6 +97,8 @@ export class AuthService {
   ) {
     this.loginByOtpEnabled =
       this.configService.get<string>("AUTH_LOGIN_WITH_OTP") === "true";
+    this.accessTokenSecret =
+      this.configService.get<string>("JWT_ACCESS_SECRET") ?? "access-dev-secret";
   }
 
   async createUser(input: CreateUserInput): Promise<{
@@ -311,7 +314,14 @@ export class AuthService {
     });
 
     return {
-      accessToken: this.generateOpaqueToken(24),
+      accessToken: this.generateAccessToken({
+        id: user.id,
+        businessId: user.businessId,
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phoneE164,
+        isActive: user.isActive
+      }),
       refreshToken: `${next.id}.${nextSecret}`
     };
   }
@@ -341,7 +351,7 @@ export class AuthService {
 
     return {
       session: {
-        accessToken: this.generateOpaqueToken(24),
+        accessToken: this.generateAccessToken(user),
         refreshToken: `${refreshToken.id}.${refreshSecret}`,
         expiresIn: this.accessExpiresInSeconds,
         tokenType: "Bearer",
@@ -386,6 +396,23 @@ export class AuthService {
       .update(randomBytes(bytes))
       .update(Date.now().toString())
       .digest("hex");
+  }
+
+  private generateAccessToken(user: AuthenticatedUser): string {
+    const payload = Buffer.from(
+      JSON.stringify({
+        sub: user.id,
+        businessId: user.businessId,
+        iat: Date.now()
+      })
+    ).toString("base64url");
+
+    const signature = createHash("sha256")
+      .update(payload)
+      .update(this.accessTokenSecret)
+      .digest("hex");
+
+    return `${payload}.${signature}`;
   }
 
   private encryptOtpForSms(code: string, destinationMobile: string): string {

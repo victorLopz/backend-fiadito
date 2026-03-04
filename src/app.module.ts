@@ -1,26 +1,13 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthService } from './modules/auth/application/use-cases/auth.service';
-import { BUSINESS_REPOSITORY } from './modules/auth/domain/repositories/business.repository';
-import { OTP_REPOSITORY } from './modules/auth/domain/repositories/otp.repository';
-import { SESSION_REPOSITORY } from './modules/auth/domain/repositories/session.repository';
-import { TOKEN_REPOSITORY } from './modules/auth/domain/repositories/token.repository';
-import { USER_REPOSITORY } from './modules/auth/domain/repositories/user.repository';
-import { TypeOrmBusinessRepository } from './modules/auth/infrastructure/repositories/typeorm-business.repository';
-import { TypeOrmOtpRepository } from './modules/auth/infrastructure/repositories/typeorm-otp.repository';
-import { TypeOrmSessionRepository } from './modules/auth/infrastructure/repositories/typeorm-session.repository';
-import { TypeOrmTokenRepository } from './modules/auth/infrastructure/repositories/typeorm-token.repository';
-import { TypeOrmUserRepository } from './modules/auth/infrastructure/repositories/typeorm-user.repository';
-import { DebtsService } from './modules/debts/application/use-cases/debts.service';
-import { InventoryService } from './modules/inventory/application/use-cases/inventory.service';
-import { SalesService } from './modules/sales/application/use-cases/sales.service';
-import { AuthController } from './modules/auth/presentation/controllers/auth.controller';
-import { DebtsController } from './modules/debts/presentation/controllers/debts.controller';
-import { InventoryController } from './modules/inventory/presentation/controllers/inventory.controller';
-import { SalesController } from './modules/sales/presentation/controllers/sales.controller';
+import { AuthModule } from './modules/auth/auth.module';
+import { DebtsModule } from './modules/debts/debts.module';
+import { InventoryModule } from './modules/inventory/inventory.module';
+import { SalesModule } from './modules/sales/sales.module';
+import { BusinessContextMiddleware } from './shared/common/middlewares';
 import { TYPEORM_ENTITIES } from './shared/infrastructure/persistence/entities';
 
 @Module({
@@ -41,28 +28,22 @@ import { TYPEORM_ENTITIES } from './shared/infrastructure/persistence/entities';
         synchronize: false,
       }),
     }),
-    TypeOrmModule.forFeature(TYPEORM_ENTITIES),
+    AuthModule,
+    InventoryModule,
+    SalesModule,
+    DebtsModule,
   ],
-  controllers: [AuthController, InventoryController, SalesController, DebtsController],
+  controllers: [],
   providers: [
-    AuthService,
-    InventoryService,
-    SalesService,
-    DebtsService,
-    TypeOrmUserRepository,
-    TypeOrmBusinessRepository,
-    TypeOrmOtpRepository,
-    TypeOrmTokenRepository,
-    TypeOrmSessionRepository,
-    { provide: USER_REPOSITORY, useExisting: TypeOrmUserRepository },
-    { provide: BUSINESS_REPOSITORY, useExisting: TypeOrmBusinessRepository },
-    { provide: OTP_REPOSITORY, useExisting: TypeOrmOtpRepository },
-    { provide: TOKEN_REPOSITORY, useExisting: TypeOrmTokenRepository },
-    { provide: SESSION_REPOSITORY, useExisting: TypeOrmSessionRepository },
+    BusinessContextMiddleware,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(BusinessContextMiddleware).forRoutes('*');
+  }
+}

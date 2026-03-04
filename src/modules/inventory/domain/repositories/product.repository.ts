@@ -1,8 +1,28 @@
+import { ProductTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/product.typeorm-entity";
+
+export const PRODUCT_REPOSITORY = Symbol("PRODUCT_REPOSITORY");
+
 export interface ProductRepository {
-  countByBusinessId(businessId: string): Promise<number>;
-  create(input: Record<string, unknown>): Promise<{ id: string }>;
-  update(id: string, businessId: string, input: Record<string, unknown>): Promise<void>;
-  deactivate(id: string, businessId: string): Promise<void>;
-  findById(id: string, businessId: string): Promise<Record<string, unknown> | null>;
-  findLowStock(businessId: string): Promise<Record<string, unknown>[]>;
+  create(input: {
+    businessId: string;
+    sku: string;
+    name: string;
+    barcode?: string;
+    price: string;
+    cost: string;
+    stockCurrent: number;
+    stockMin?: number;
+    createdBy: string;
+  }): Promise<ProductTypeOrmEntity>;
+  findById(
+    id: string,
+    businessId: string
+  ): Promise<ProductTypeOrmEntity | null>;
+  update(
+    id: string,
+    businessId: string,
+    input: Partial<ProductTypeOrmEntity>
+  ): Promise<void>;
+  deactivate(id: string, businessId: string): Promise<boolean>;
+  findLowStockCandidates(businessId: string): Promise<ProductTypeOrmEntity[]>;
 }

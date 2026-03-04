@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { BusinessId, CurrentUser } from 'src/shared/common/decorators';
+import { AuthUser } from 'src/shared/common/interfaces';
 import { SalesService } from '../../application/use-cases/sales.service';
 
 @Controller('sales')
@@ -7,7 +8,7 @@ export class SalesController {
   constructor(private readonly salesService: SalesService) {}
 
   @Post()
-  createSale(@Body() dto: Record<string, unknown>, @BusinessId() businessId: string, @CurrentUser() user: { id?: string } | undefined) {
+  createSale(@Body() dto: Record<string, unknown>, @BusinessId() businessId: string, @CurrentUser() user: AuthUser) {
     return this.salesService.createSale({ ...dto, businessId: dto.businessId ?? businessId, userId: dto.userId ?? user?.id });
   }
 

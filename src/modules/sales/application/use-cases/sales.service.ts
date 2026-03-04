@@ -86,7 +86,7 @@ export class SalesService {
           throw new BadRequestException('Item quantity must be an integer > 0');
         }
 
-        if (!product.allowNegativeStock && product.stock < item.quantity) {
+        if (product.stockCurrent < item.quantity) {
           throw new BadRequestException(`Insufficient stock for product ${product.id}`);
         }
 
@@ -95,7 +95,7 @@ export class SalesService {
         const lineTotal = unitPrice * item.quantity;
 
         subtotal += lineTotal;
-        product.stock -= item.quantity;
+        product.stockCurrent -= item.quantity;
 
         saleItemsToCreate.push({
           businessId: input.businessId,
@@ -148,12 +148,12 @@ export class SalesService {
         movementsToCreate.map((movement) =>
           movementRepo.create({
             ...movement,
-            referenceId: sale.id,
+            // referenceId: sale.id,
           }),
         ),
       );
 
-      await Promise.all(products.map((product) => productRepo.update({ id: product.id }, { stock: product.stock })));
+      await Promise.all(products.map((product) => productRepo.update({ id: product.id }, { stockCurrent: product.stockCurrent })));
 
       if (input.type === SaleType.CREDIT) {
         if (!input.clientId) {
