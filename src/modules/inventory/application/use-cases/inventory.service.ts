@@ -28,6 +28,7 @@ export class InventoryService {
     private readonly inventoryMovementRepository: InventoryMovementRepository
   ) {}
 
+  /** Crea un producto de inventario y registra movimiento inicial cuando aplica. */
   async createProduct(
     dto: CreateProductDto,
     businessId: string,
@@ -79,6 +80,7 @@ export class InventoryService {
     };
   }
 
+  /** Lista productos paginados con filtros de nombre y costo. */
   async listProducts(
     businessId: string,
     query: ListProductsQueryDto
@@ -132,6 +134,7 @@ export class InventoryService {
     };
   }
 
+  /** Actualiza datos editables de un producto existente. */
   async updateProduct(
     id: string,
     dto: UpdateProductDto,
@@ -170,6 +173,7 @@ export class InventoryService {
     await this.productRepository.update(id, businessId, updatePayload);
   }
 
+  /** Desactiva un producto del inventario. */
   async deactivateProduct(
     productId: string,
     businessId: string
@@ -187,6 +191,7 @@ export class InventoryService {
     }
   }
 
+  /** Lista productos con stock actual por debajo del mínimo configurado. */
   async listLowStock(
     businessId: string,
     query: ListLowStockQueryDto

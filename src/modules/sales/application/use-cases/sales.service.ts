@@ -27,6 +27,7 @@ type CreateSaleInput = {
 export class SalesService {
   constructor(private readonly dataSource: DataSource) {}
 
+  /** Crea una venta, descuenta inventario y genera deuda/comprobante según tipo. */
   async createSale(dto: Record<string, unknown>): Promise<{ saleId: string }> {
     const input = this.parseCreateSaleInput(dto);
 
@@ -191,6 +192,7 @@ export class SalesService {
     }
   }
 
+  /** Lista ventas del negocio en un rango de fechas. */
   async listSales(filters: { businessId: string; from: Date; to: Date }): Promise<Record<string, unknown>[]> {
     if (!filters.businessId) {
       throw new BadRequestException('businessId is required');

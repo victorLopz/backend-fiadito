@@ -11,6 +11,7 @@ import { DebtStatus } from 'src/shared/infrastructure/persistence/entities/enums
 export class DebtsService {
   constructor(private readonly dataSource: DataSource) {}
 
+  /** Registra un pago de deuda y recalcula saldo/estado de la deuda. */
   async addPayment(debtId: string, amount: number, userId?: string): Promise<void> {
     if (!debtId) {
       throw new BadRequestException('debtId is required');
@@ -77,6 +78,7 @@ export class DebtsService {
     }
   }
 
+  /** Lista deudas abiertas o parciales por negocio. */
   async listOpenDebts(filters: Record<string, unknown>): Promise<Record<string, unknown>[]> {
     const businessId = typeof filters.businessId === 'string' ? filters.businessId : '';
     if (!businessId) {
@@ -106,6 +108,7 @@ export class DebtsService {
     }));
   }
 
+  /** Encola un recordatorio de deuda para envío por WhatsApp. */
   async sendDebtReminder(debtId: string): Promise<void> {
     const debtRepo = this.dataSource.getRepository(DebtTypeOrmEntity);
     const clientRepo = this.dataSource.getRepository(ClientTypeOrmEntity);

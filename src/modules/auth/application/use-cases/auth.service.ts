@@ -101,6 +101,7 @@ export class AuthService {
       this.configService.get<string>("JWT_ACCESS_SECRET") ?? "access-dev-secret";
   }
 
+  /** Crea negocio + usuario inicial validando unicidad de nombre, teléfono y correo. */
   async createUser(input: CreateUserInput): Promise<{
     id: string;
     businessId: string;
@@ -167,6 +168,7 @@ export class AuthService {
     };
   }
 
+  /** Genera y registra un OTP activo para un destino móvil y propósito específico. */
   async requestOtp(destinationMobile: string, purpose: string): Promise<void> {
     if (!this.otpRegex.test(destinationMobile)) {
       throw new UnauthorizedException("destinationMobile must be E.164");
@@ -191,6 +193,7 @@ export class AuthService {
     this.sendOtpSmsEncrypted(destinationMobile, encryptedPayload);
   }
 
+  /** Verifica un OTP y, para LOGIN, emite sesión con access/refresh tokens. */
   async verifyOtp(
     destinationMobile: string,
     code: string,
@@ -241,6 +244,7 @@ export class AuthService {
     });
   }
 
+  /** Autentica con teléfono+contraseña y opcionalmente exige OTP según configuración. */
   async loginWithPhone(
     destinationMobile: string,
     password: string
@@ -275,6 +279,7 @@ export class AuthService {
     return { session: session.session };
   }
 
+  /** Rota refresh token vigente y devuelve nuevo par de tokens. */
   async refreshToken(
     rotationToken: string
   ): Promise<{ accessToken: string; refreshToken: string }> {
