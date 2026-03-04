@@ -25,4 +25,12 @@ export interface ProductRepository {
   ): Promise<void>;
   deactivate(id: string, businessId: string): Promise<boolean>;
   findLowStockCandidates(businessId: string): Promise<ProductTypeOrmEntity[]>;
+  findPaginated(input: {
+    businessId: string;
+    page: number;
+    limit: number;
+    name?: string;
+    minCost?: number;
+    maxCost?: number;
+  }): Promise<{ items: ProductTypeOrmEntity[]; total: number }>;
 }

@@ -15,12 +15,15 @@ import {
   TokenRepository
 } from "./domain/repositories/token.repository";
 import { USER_REPOSITORY, UserRepository } from "./domain/repositories/user.repository";
+import { TOKEN_SERVICE, TokenService } from "./domain/services/token.service";
 import { TypeOrmBusinessRepository } from "./infrastructure/repositories/typeorm-business.repository";
 import { TypeOrmOtpRepository } from "./infrastructure/repositories/typeorm-otp.repository";
 import { TypeOrmSessionRepository } from "./infrastructure/repositories/typeorm-session.repository";
 import { TypeOrmTokenRepository } from "./infrastructure/repositories/typeorm-token.repository";
 import { TypeOrmUserRepository } from "./infrastructure/repositories/typeorm-user.repository";
+import { HashTokenService } from "./infrastructure/services/hash-token.service";
 import { AuthController } from "./presentation/controllers/auth.controller";
+import { JwtAuthGuard } from "src/shared/common/guards/jwt-auth.guard";
 import { AuthTokenTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/auth-token.typeorm-entity";
 import { BusinessTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/business.typeorm-entity";
 import { OtpCodeTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/otp-code.typeorm-entity";
@@ -45,12 +48,15 @@ import { UserTypeOrmEntity } from "src/shared/infrastructure/persistence/entitie
     TypeOrmOtpRepository,
     TypeOrmTokenRepository,
     TypeOrmSessionRepository,
+    HashTokenService,
+    JwtAuthGuard,
     { provide: USER_REPOSITORY, useExisting: TypeOrmUserRepository },
     { provide: BUSINESS_REPOSITORY, useExisting: TypeOrmBusinessRepository },
     { provide: OTP_REPOSITORY, useExisting: TypeOrmOtpRepository },
     { provide: TOKEN_REPOSITORY, useExisting: TypeOrmTokenRepository },
-    { provide: SESSION_REPOSITORY, useExisting: TypeOrmSessionRepository }
+    { provide: SESSION_REPOSITORY, useExisting: TypeOrmSessionRepository },
+    { provide: TOKEN_SERVICE, useExisting: HashTokenService }
   ],
-  exports: [AuthService]
+  exports: [AuthService, USER_REPOSITORY, TOKEN_SERVICE, JwtAuthGuard]
 })
 export class AuthModule {}

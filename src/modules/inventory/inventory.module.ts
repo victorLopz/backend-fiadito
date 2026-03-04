@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from '../auth/auth.module';
 import { InventoryService } from './application/use-cases/inventory.service';
 import { INVENTORY_MOVEMENT_REPOSITORY } from './domain/repositories/inventory-movement.repository';
 import { PRODUCT_REPOSITORY } from './domain/repositories/product.repository';
@@ -10,7 +11,7 @@ import { InventoryMovementTypeOrmEntity } from 'src/shared/infrastructure/persis
 import { ProductTypeOrmEntity } from 'src/shared/infrastructure/persistence/entities/product.typeorm-entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ProductTypeOrmEntity, InventoryMovementTypeOrmEntity])],
+  imports: [AuthModule, TypeOrmModule.forFeature([ProductTypeOrmEntity, InventoryMovementTypeOrmEntity])],
   controllers: [InventoryController],
   providers: [
     InventoryService,

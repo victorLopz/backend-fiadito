@@ -5,6 +5,7 @@ import {
   NotFoundException
 } from "@nestjs/common";
 import { CreateProductDto } from "../dto/create-product.dto";
+import { ListProductsQueryDto } from "../dto/list-products-query.dto";
 import { UpdateProductDto } from "../dto/update-product.dto";
 import {
   INVENTORY_MOVEMENT_REPOSITORY,
@@ -30,7 +31,7 @@ export class InventoryService {
     dto: CreateProductDto,
     businessId: string,
     userId: string
-  ): Promise<{ id: string }> {
+  ): Promise<Record<string, unknown>> {
     if (!businessId) {
       throw new BadRequestException("businessId is required");
     }
@@ -60,7 +61,74 @@ export class InventoryService {
       });
     }
 
-    return { id: product.id };
+    return {
+      id: product.id,
+      businessId: product.businessId,
+      sku: product.sku,
+      name: product.name,
+      barcode: product.barcode,
+      price: Number(product.price),
+      cost: Number(product.cost),
+      stockCurrent: product.stockCurrent,
+      stockMin: product.stockMin,
+      isActive: product.isActive,
+      createdBy: product.createdBy,
+      createdAt: product.createdAt,
+      updatedAt: product.updatedAt
+    };
+  }
+
+  async listProducts(
+    businessId: string,
+    query: ListProductsQueryDto
+  ): Promise<Record<string, unknown>> {
+    if (!businessId) {
+      throw new BadRequestException("businessId is required");
+    }
+
+    if (
+      query.minCost !== undefined &&
+      query.maxCost !== undefined &&
+      query.minCost > query.maxCost
+    ) {
+      throw new BadRequestException("minCost cannot be greater than maxCost");
+    }
+
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 20;
+
+    const { items, total } = await this.productRepository.findPaginated({
+      businessId,
+      page,
+      limit,
+      name: query.name,
+      minCost: query.minCost,
+      maxCost: query.maxCost
+    });
+
+    const data = items.map((row) => ({
+      id: row.id,
+      businessId: row.businessId,
+      sku: row.sku,
+      name: row.name,
+      barcode: row.barcode,
+      price: Number(row.price),
+      cost: Number(row.cost),
+      stockCurrent: row.stockCurrent,
+      stockMin: row.stockMin,
+      isActive: row.isActive,
+      createdBy: row.createdBy,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt
+    }));
+
+    return {
+      data,
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit)
+    };
   }
 
   async updateProduct(

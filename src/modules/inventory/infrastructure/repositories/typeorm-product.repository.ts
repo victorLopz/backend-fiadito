@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { ILike, Raw, Repository } from "typeorm";
 import { ProductRepository } from "src/modules/inventory/domain/repositories/product.repository";
 import { ProductTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/product.typeorm-entity";
 
@@ -74,5 +74,48 @@ export class TypeOrmProductRepository implements ProductRepository {
         stockCurrent: "ASC"
       }
     });
+  }
+
+  async findPaginated(input: {
+    businessId: string;
+    page: number;
+    limit: number;
+    name?: string;
+    minCost?: number;
+    maxCost?: number;
+  }): Promise<{ items: ProductTypeOrmEntity[]; total: number }> {
+    const where: Record<string, unknown> = {
+      businessId: input.businessId,
+      isActive: true
+    };
+
+    if (input.name?.trim()) {
+      where.name = ILike(`%${input.name.trim()}%`);
+    }
+
+    const { minCost, maxCost } = input;
+
+    if (minCost !== undefined || maxCost !== undefined) {
+      where.cost = Raw(
+        (alias) => {
+          const conditions = [];
+
+          if (minCost !== undefined) conditions.push(`${alias} >= :minCost`);
+          if (maxCost !== undefined) conditions.push(`${alias} <= :maxCost`);
+
+          return conditions.join(" AND ");
+        },
+        { minCost, maxCost }
+      );
+    }
+
+    const [items, total] = await this.repository.findAndCount({
+      where,
+      order: { createdAt: "DESC" },
+      skip: (input.page - 1) * input.limit,
+      take: input.limit
+    });
+
+    return { items, total };
   }
 }
