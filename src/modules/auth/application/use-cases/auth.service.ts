@@ -38,6 +38,19 @@ type SessionResponse = {
     refreshToken: string;
     expiresIn: number;
     tokenType: "Bearer";
+    business: {
+      id: string;
+      name: string;
+      isActive: boolean;
+    };
+    user: {
+      id: string;
+      businessId: string;
+      fullName: string;
+      email?: string;
+      phone?: string;
+      isActive: boolean;
+    };
   };
 };
 
@@ -53,6 +66,10 @@ type CreateUserInput = {
 type AuthenticatedUser = {
   id: string;
   businessId: string;
+  fullName: string;
+  email?: string;
+  phone?: string;
+  isActive: boolean;
 };
 
 @Injectable()
@@ -211,7 +228,14 @@ export class AuthService {
       throw new UnauthorizedException("User not found for this phone number");
     }
 
-    return this.issueSession({ id: user.id, businessId: user.businessId });
+    return this.issueSession({
+      id: user.id,
+      businessId: user.businessId,
+      fullName: user.fullName,
+      email: user.email,
+      phone: user.phoneE164,
+      isActive: user.isActive
+    });
   }
 
   async loginWithPhone(
@@ -239,7 +263,11 @@ export class AuthService {
 
     const session = await this.issueSession({
       id: user.id,
-      businessId: user.businessId
+      businessId: user.businessId,
+      fullName: user.fullName,
+      email: user.email,
+      phone: user.phoneE164,
+      isActive: user.isActive
     });
     return { session: session.session };
   }
@@ -291,6 +319,11 @@ export class AuthService {
   private async issueSession(
     user: AuthenticatedUser
   ): Promise<SessionResponse> {
+    const business = await this.businessRepository.findById(user.businessId);
+    if (!business) {
+      throw new UnauthorizedException("Business not found for this user");
+    }
+
     await this.sessionRepository.create({
       businessId: user.businessId,
       userId: user.id
@@ -311,7 +344,20 @@ export class AuthService {
         accessToken: this.generateOpaqueToken(24),
         refreshToken: `${refreshToken.id}.${refreshSecret}`,
         expiresIn: this.accessExpiresInSeconds,
-        tokenType: "Bearer"
+        tokenType: "Bearer",
+        business: {
+          id: business.id,
+          name: business.name,
+          isActive: business.isActive
+        },
+        user: {
+          id: user.id,
+          businessId: user.businessId,
+          fullName: user.fullName,
+          email: user.email,
+          phone: user.phone,
+          isActive: user.isActive
+        }
       }
     };
   }
