@@ -60,7 +60,17 @@ export class DocumentBuilder {
   }
 
   build(): SwaggerDoc {
-    return { ...this.document };
+    return {
+      openapi: this.document.openapi,
+      info: { ...this.document.info },
+      components: this.document.components
+        ? {
+            securitySchemes: this.document.components.securitySchemes
+              ? { ...this.document.components.securitySchemes }
+              : undefined,
+          }
+        : undefined,
+    };
   }
 }
 
@@ -71,16 +81,47 @@ export class SwaggerModule {
 
   static setup(path: string, app: INestApplication, document: SwaggerDoc, options?: { swaggerOptions?: { persistAuthorization?: boolean } }): void {
     const adapter = app.getHttpAdapter();
+    const normalizedPath = path.replace(/^\/+/, '').replace(/\/+$/, '');
+    const basePath = `/${normalizedPath}`;
+    const jsonPath = `${basePath}/json`;
+    const persistAuth = Boolean(options?.swaggerOptions?.persistAuthorization);
 
-    adapter.get(`/${path}/json`, (_req: unknown, res: { json: (value: unknown) => void }) => {
+    adapter.get(jsonPath, (_req: unknown, res: { json: (value: unknown) => void }) => {
       res.json(document);
     });
 
-    adapter.get(`/${path}`, (_req: unknown, res: { send: (value: string) => void }) => {
-      const persistAuth = Boolean(options?.swaggerOptions?.persistAuthorization);
-      res.send(
-        `<html><body><h1>${document.info.title}</h1><p>${document.info.description}</p><p>OpenAPI JSON: <a href="/${path}/json">/${path}/json</a></p><p>persistAuthorization: ${persistAuth}</p></body></html>`,
-      );
+    adapter.get(basePath, (_req: unknown, res: { type: (value: string) => void; send: (value: string) => void }) => {
+      res.type('text/html');
+      res.send(`<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${document.info.title} - Swagger UI</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+  <style>
+    html, body { margin: 0; padding: 0; background: #fafafa; }
+    #swagger-ui { max-width: 1200px; margin: 0 auto; }
+  </style>
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js" crossorigin></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js" crossorigin></script>
+  <script>
+    window.onload = () => {
+      window.ui = SwaggerUIBundle({
+        url: '${jsonPath}',
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+        layout: 'StandaloneLayout',
+        persistAuthorization: ${persistAuth ? 'true' : 'false'}
+      });
+    };
+  </script>
+</body>
+</html>`);
     });
   }
 }
