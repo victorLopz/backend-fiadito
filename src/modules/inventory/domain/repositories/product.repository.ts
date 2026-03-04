@@ -24,7 +24,12 @@ export interface ProductRepository {
     input: Partial<ProductTypeOrmEntity>
   ): Promise<void>;
   deactivate(id: string, businessId: string): Promise<boolean>;
-  findLowStockCandidates(businessId: string): Promise<ProductTypeOrmEntity[]>;
+  findLowStockPaginated(input: {
+    businessId: string;
+    page: number;
+    limit: number;
+    name?: string;
+  }): Promise<{ items: ProductTypeOrmEntity[]; total: number }>;
   findPaginated(input: {
     businessId: string;
     page: number;

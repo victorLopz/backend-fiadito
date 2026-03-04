@@ -62,18 +62,30 @@ export class TypeOrmProductRepository implements ProductRepository {
     return !!result.affected;
   }
 
-  async findLowStockCandidates(
-    businessId: string
-  ): Promise<ProductTypeOrmEntity[]> {
-    return this.repository.find({
-      where: {
-        businessId,
-        isActive: true
-      },
-      order: {
-        stockCurrent: "ASC"
-      }
+  async findLowStockPaginated(input: {
+    businessId: string;
+    page: number;
+    limit: number;
+    name?: string;
+  }): Promise<{ items: ProductTypeOrmEntity[]; total: number }> {
+    const where: Record<string, unknown> = {
+      businessId: input.businessId,
+      isActive: true,
+      stockCurrent: Raw((alias) => `${alias} <= "stock_min"`)
+    };
+
+    if (input.name?.trim()) {
+      where.name = ILike(`%${input.name.trim()}%`);
+    }
+
+    const [items, total] = await this.repository.findAndCount({
+      where,
+      order: { stockCurrent: "ASC", name: "ASC" },
+      skip: (input.page - 1) * input.limit,
+      take: input.limit
     });
+
+    return { items, total };
   }
 
   async findPaginated(input: {
@@ -93,20 +105,19 @@ export class TypeOrmProductRepository implements ProductRepository {
       where.name = ILike(`%${input.name.trim()}%`);
     }
 
-    const { minCost, maxCost } = input;
-
-    if (minCost !== undefined || maxCost !== undefined) {
+    if (input.minCost !== undefined && input.maxCost !== undefined) {
       where.cost = Raw(
-        (alias) => {
-          const conditions = [];
-
-          if (minCost !== undefined) conditions.push(`${alias} >= :minCost`);
-          if (maxCost !== undefined) conditions.push(`${alias} <= :maxCost`);
-
-          return conditions.join(" AND ");
-        },
-        { minCost, maxCost }
+        (alias) => `${alias}::numeric BETWEEN :minCost AND :maxCost`,
+        { minCost: input.minCost, maxCost: input.maxCost }
       );
+    } else if (input.minCost !== undefined) {
+      where.cost = Raw((alias) => `${alias}::numeric >= :minCost`, {
+        minCost: input.minCost
+      });
+    } else if (input.maxCost !== undefined) {
+      where.cost = Raw((alias) => `${alias}::numeric <= :maxCost`, {
+        maxCost: input.maxCost
+      });
     }
 
     const [items, total] = await this.repository.findAndCount({

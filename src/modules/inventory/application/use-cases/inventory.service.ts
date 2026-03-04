@@ -5,6 +5,7 @@ import {
   NotFoundException
 } from "@nestjs/common";
 import { CreateProductDto } from "../dto/create-product.dto";
+import { ListLowStockQueryDto } from "../dto/list-low-stock-query.dto";
 import { ListProductsQueryDto } from "../dto/list-products-query.dto";
 import { UpdateProductDto } from "../dto/update-product.dto";
 import {
@@ -186,27 +187,43 @@ export class InventoryService {
     }
   }
 
-  async listLowStock(businessId: string): Promise<Record<string, unknown>[]> {
+  async listLowStock(
+    businessId: string,
+    query: ListLowStockQueryDto
+  ): Promise<Record<string, unknown>> {
     if (!businessId) {
       throw new BadRequestException("businessId is required");
     }
 
-    const rows =
-      await this.productRepository.findLowStockCandidates(businessId);
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 20;
 
-    return rows
-      .filter((row) => row.stockCurrent <= row.stockMin)
-      .map((row) => ({
-        id: row.id,
-        businessId: row.businessId,
-        sku: row.sku,
-        name: row.name,
-        barcode: row.barcode,
-        stockCurrent: row.stockCurrent,
-        stockMin: row.stockMin,
-        price: Number(row.price),
-        cost: Number(row.cost)
-      }));
+    const { items, total } = await this.productRepository.findLowStockPaginated({
+      businessId,
+      page,
+      limit,
+      name: query.name
+    });
+
+    const data = items.map((row) => ({
+      id: row.id,
+      businessId: row.businessId,
+      sku: row.sku,
+      name: row.name,
+      barcode: row.barcode,
+      stockCurrent: row.stockCurrent,
+      stockMin: row.stockMin,
+      price: Number(row.price),
+      cost: Number(row.cost)
+    }));
+
+    return {
+      data,
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit)
+    };
   }
 
   private toMoney(amount: number): string {
