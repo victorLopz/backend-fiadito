@@ -6,6 +6,8 @@ import { ClientTypeOrmEntity } from "./client.typeorm-entity"
 import { DebtPaymentTypeOrmEntity } from "./debt-payment.typeorm-entity"
 import { DebtTypeOrmEntity } from "./debt.typeorm-entity"
 import { InventoryMovementTypeOrmEntity } from "./inventory-movement.typeorm-entity"
+import { InvoiceItemTypeOrmEntity } from "src/modules/sales/invoicing/infrastructure/persistence/typeorm/invoice-item.typeorm-entity"
+import { InvoiceTypeOrmEntity } from "src/modules/sales/invoicing/infrastructure/persistence/typeorm/invoice.typeorm-entity"
 import { OtpCodeTypeOrmEntity } from "./otp-code.typeorm-entity"
 import { PlanTypeOrmEntity } from "./plan.typeorm-entity"
 import { ProductTypeOrmEntity } from "./product.typeorm-entity"
@@ -27,6 +29,8 @@ export const TYPEORM_ENTITIES = [
   BusinessSubscriptionTypeOrmEntity,
   ProductTypeOrmEntity,
   InventoryMovementTypeOrmEntity,
+  InvoiceTypeOrmEntity,
+  InvoiceItemTypeOrmEntity,
   ClientTypeOrmEntity,
   SaleTypeOrmEntity,
   SaleItemTypeOrmEntity,
