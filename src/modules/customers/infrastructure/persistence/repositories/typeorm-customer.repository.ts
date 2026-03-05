@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
-import { CustomersTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/customers.typeorm-entity"
+import { CustomerTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/customers.typeorm-entity"
 import { ILike, Repository } from "typeorm"
 import { Customer } from "src/modules/customers/domain/entities/customer.entity"
 import { ICustomerRepository } from "src/modules/customers/domain/repositories/customer.repository"
@@ -9,8 +9,8 @@ import { CustomerMapper } from "../mappers/customer.mapper"
 @Injectable()
 export class TypeOrmCustomerRepository implements ICustomerRepository {
   constructor(
-    @InjectRepository(CustomersTypeOrmEntity)
-    private readonly repository: Repository<CustomersTypeOrmEntity>
+    @InjectRepository(CustomerTypeOrmEntity)
+    private readonly repository: Repository<CustomerTypeOrmEntity>
   ) {}
 
   async create(input: {
@@ -37,7 +37,7 @@ export class TypeOrmCustomerRepository implements ICustomerRepository {
     businessId: string,
     input: { nombre?: string; telefonoWhatsApp?: string; consentimientoVoucher?: boolean }
   ): Promise<void> {
-    const payload: Partial<CustomersTypeOrmEntity> = {}
+    const payload: Partial<CustomerTypeOrmEntity> = {}
 
     if (input.nombre !== undefined) {
       payload.nombre = input.nombre

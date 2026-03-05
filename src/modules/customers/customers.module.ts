@@ -5,12 +5,12 @@ import { CreateCustomerService } from "./application/use-cases/create-customer.s
 import { GetCustomersService } from "./application/use-cases/get-customers.service"
 import { UpdateCustomerService } from "./application/use-cases/update-customer.service"
 import { CUSTOMER_REPOSITORY } from "./domain/repositories/customer.repository"
-import { CustomersTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/customers.typeorm-entity"
+import { CustomerTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/customers.typeorm-entity"
 import { TypeOrmCustomerRepository } from "./infrastructure/persistence/repositories/typeorm-customer.repository"
 import { CustomersController } from "./presentation/controllers/customers.controller"
 
 @Module({
-  imports: [AuthModule, TypeOrmModule.forFeature([CustomersTypeOrmEntity])],
+  imports: [AuthModule, TypeOrmModule.forFeature([CustomerTypeOrmEntity])],
   controllers: [CustomersController],
   providers: [
     CreateCustomerService,

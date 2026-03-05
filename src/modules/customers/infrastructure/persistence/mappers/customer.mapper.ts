@@ -1,8 +1,8 @@
 import { Customer } from "src/modules/customers/domain/entities/customer.entity"
-import { CustomersTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/customers.typeorm-entity"
+import { CustomerTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/customers.typeorm-entity"
 
 export class CustomerMapper {
-  static toDomain(entity: CustomersTypeOrmEntity): Customer {
+  static toDomain(entity: CustomerTypeOrmEntity): Customer {
     return new Customer(
       entity.id,
       entity.businessId,

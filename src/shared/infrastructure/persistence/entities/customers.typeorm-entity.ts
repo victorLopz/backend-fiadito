@@ -2,7 +2,7 @@ import { Column, CreateDateColumn, Entity, Index, PrimaryColumn, UpdateDateColum
 
 @Entity("customers")
 @Index(["businessId", "telefonoWhatsApp"])
-export class CustomersTypeOrmEntity {
+export class CustomerTypeOrmEntity {
   @PrimaryColumn("uuid")
   id!: string
 
