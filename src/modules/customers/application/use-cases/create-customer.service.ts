@@ -19,7 +19,7 @@ export class CreateCustomerService {
       name: dto.name,
       whatsappE164: dto.whatsappE164,
       notes: dto.notes,
-      isActive: dto.isActive
+      isActive: true
     })
 
     return {
