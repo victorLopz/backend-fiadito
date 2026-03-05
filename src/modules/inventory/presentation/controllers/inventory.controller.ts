@@ -1,54 +1,53 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  ParseUUIDPipe,
-  Patch,
-  Post,
-  Query,
-  UseGuards
-} from "@nestjs/common"
+import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common"
 import { BusinessId, CurrentUser } from "src/shared/common/decorators"
 import { AuthUser } from "src/shared/common/interfaces"
-import { CreateProductDto } from "../../application/dto/create-product.dto"
-import { ListLowStockQueryDto } from "../../application/dto/list-low-stock-query.dto"
-import { ListProductsQueryDto } from "../../application/dto/list-products-query.dto"
-import { UpdateProductDto } from "../../application/dto/update-product.dto"
-import { InventoryService } from "../../application/use-cases/inventory.service"
 import { JwtAuthGuard } from "src/shared/common/guards/jwt-auth.guard"
+import { InventoryAdjustmentRequestDto } from "../../application/dto/inventory-adjustment-request.dto"
+import { KardexQueryDto } from "../../application/dto/kardex-query.dto"
+import { StockEntryRequestDto } from "../../application/dto/stock-entry-request.dto"
+import { InventoryAdjustmentService } from "../../application/use-cases/inventory-adjustment.service"
+import { KardexHistoryService } from "../../application/use-cases/kardex-history.service"
+import { StockEntryService } from "../../application/use-cases/stock-entry.service"
 
-@Controller("inventory/products")
+@Controller("inventory")
 @UseGuards(JwtAuthGuard)
 export class InventoryController {
-  constructor(private readonly inventoryService: InventoryService) {}
+  constructor(
+    private readonly stockEntryService: StockEntryService,
+    private readonly inventoryAdjustmentService: InventoryAdjustmentService,
+    private readonly kardexHistoryService: KardexHistoryService
+  ) {}
 
-  @Post()
-  create(@Body() dto: CreateProductDto, @CurrentUser() user: AuthUser) {
-    return this.inventoryService.createProduct(dto, user.businessId, user?.id ?? "system")
-  }
-
-  @Get()
-  list(@BusinessId() businessId: string, @Query() query: ListProductsQueryDto) {
-    return this.inventoryService.listProducts(businessId, query)
-  }
-
-  @Patch(":id")
-  update(
-    @Param("id", ParseUUIDPipe) id: string,
-    @Body() dto: UpdateProductDto,
-    @BusinessId() businessId: string
+  @Post("stock-entry")
+  stockEntry(
+    @Body() dto: StockEntryRequestDto,
+    @BusinessId() businessId: string,
+    @CurrentUser() user: AuthUser
   ) {
-    return this.inventoryService.updateProduct(id, dto, businessId)
+    return this.stockEntryService.execute(businessId, {
+      productId: dto.productId,
+      quantity: dto.quantity,
+      reason: dto.reason,
+      createdBy: user.id ?? "system"
+    })
   }
 
-  @Patch(":id/deactivate")
-  deactivate(@Param("id", ParseUUIDPipe) id: string, @BusinessId() businessId: string) {
-    return this.inventoryService.deactivateProduct(id, businessId)
+  @Post("adjustment")
+  adjustment(
+    @Body() dto: InventoryAdjustmentRequestDto,
+    @BusinessId() businessId: string,
+    @CurrentUser() user: AuthUser
+  ) {
+    return this.inventoryAdjustmentService.execute(businessId, {
+      productId: dto.productId,
+      quantity: dto.quantity,
+      reason: dto.reason,
+      createdBy: user.id ?? "system"
+    })
   }
 
-  @Get("low-stock")
-  listLowStock(@BusinessId() businessId: string, @Query() query: ListLowStockQueryDto) {
-    return this.inventoryService.listLowStock(businessId, query)
+  @Get("kardex")
+  kardex(@BusinessId() businessId: string, @Query() query: KardexQueryDto) {
+    return this.kardexHistoryService.execute(businessId, query)
   }
 }
