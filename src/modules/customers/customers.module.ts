@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common"
 import { TypeOrmModule } from "@nestjs/typeorm"
+import { AuthModule } from "../auth/auth.module"
 import { CreateCustomerService } from "./application/use-cases/create-customer.service"
 import { GetCustomersService } from "./application/use-cases/get-customers.service"
 import { UpdateCustomerService } from "./application/use-cases/update-customer.service"
@@ -9,7 +10,7 @@ import { TypeOrmCustomerRepository } from "./infrastructure/persistence/reposito
 import { CustomersController } from "./presentation/controllers/customers.controller"
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CustomerTypeOrmEntity])],
+  imports: [AuthModule, TypeOrmModule.forFeature([CustomerTypeOrmEntity])],
   controllers: [CustomersController],
   providers: [
     CreateCustomerService,
