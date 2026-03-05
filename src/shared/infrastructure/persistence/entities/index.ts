@@ -3,6 +3,7 @@ import { AuthTokenTypeOrmEntity } from "./auth-token.typeorm-entity"
 import { BusinessSubscriptionTypeOrmEntity } from "./business-subscription.typeorm-entity"
 import { BusinessTypeOrmEntity } from "./business.typeorm-entity"
 import { ClientTypeOrmEntity } from "./client.typeorm-entity"
+import { CustomerTypeOrmEntity } from "./customers.typeorm-entity"
 import { DebtPaymentTypeOrmEntity } from "./debt-payment.typeorm-entity"
 import { DebtTypeOrmEntity } from "./debt.typeorm-entity"
 import { InventoryMovementTypeOrmEntity } from "./inventory-movement.typeorm-entity"
@@ -28,6 +29,7 @@ export const TYPEORM_ENTITIES = [
   ProductTypeOrmEntity,
   InventoryMovementTypeOrmEntity,
   ClientTypeOrmEntity,
+  CustomerTypeOrmEntity,
   SaleTypeOrmEntity,
   SaleItemTypeOrmEntity,
   VoucherTypeOrmEntity,
