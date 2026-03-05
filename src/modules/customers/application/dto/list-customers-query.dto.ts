@@ -17,14 +17,14 @@ export class ListCustomersQueryDto {
 
   @IsOptional()
   @IsString()
-  nombre?: string
+  name?: string
 
   @IsOptional()
   @IsString()
-  telefonoWhatsApp?: string
+  whatsappE164?: string
 
   @IsOptional()
   @Type(() => Boolean)
   @IsBoolean()
-  consentimientoVoucher?: boolean
+  isActive?: boolean
 }

@@ -1,8 +1,9 @@
 export class CustomerOutput {
   id!: string
-  nombre!: string | null
-  telefonoWhatsApp!: string
-  consentimientoVoucher!: boolean
+  name!: string
+  whatsappE164!: string | null
+  notes!: string | null
+  isActive!: boolean
   createdAt!: Date
   updatedAt!: Date
 }

@@ -30,17 +30,18 @@ export class GetCustomersService {
       businessId,
       page,
       limit,
-      nombre: query.nombre,
-      telefonoWhatsApp: query.telefonoWhatsApp,
-      consentimientoVoucher: query.consentimientoVoucher
+      name: query.name,
+      whatsappE164: query.whatsappE164,
+      isActive: query.isActive
     })
 
     return {
       data: items.map((customer) => ({
         id: customer.id,
-        nombre: customer.nombre,
-        telefonoWhatsApp: customer.telefonoWhatsApp,
-        consentimientoVoucher: customer.consentimientoVoucher,
+        name: customer.name,
+        whatsappE164: customer.whatsappE164,
+        notes: customer.notes,
+        isActive: customer.isActive,
         createdAt: customer.createdAt,
         updatedAt: customer.updatedAt
       })),

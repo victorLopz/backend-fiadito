@@ -1,5 +1,6 @@
 export class UpdateCustomerInput {
-  nombre?: string
-  telefonoWhatsApp?: string
-  consentimientoVoucher?: boolean
+  name?: string
+  whatsappE164?: string
+  notes?: string
+  isActive?: boolean
 }

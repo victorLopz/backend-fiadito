@@ -4,14 +4,19 @@ export class UpdateCustomerDto {
   @IsOptional()
   @IsString()
   @MaxLength(120)
-  nombre?: string
+  name?: string
 
   @IsOptional()
   @IsString()
   @MaxLength(30)
-  telefonoWhatsApp?: string
+  whatsappE164?: string
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  notes?: string
 
   @IsOptional()
   @IsBoolean()
-  consentimientoVoucher?: boolean
+  isActive?: boolean
 }

@@ -6,9 +6,10 @@ export class CustomerMapper {
     return new Customer(
       entity.id,
       entity.businessId,
-      entity.nombre,
-      entity.telefonoWhatsApp,
-      entity.consentimientoVoucher,
+      entity.name,
+      entity.whatsappE164,
+      entity.notes,
+      entity.isActive,
       entity.createdAt,
       entity.updatedAt
     )

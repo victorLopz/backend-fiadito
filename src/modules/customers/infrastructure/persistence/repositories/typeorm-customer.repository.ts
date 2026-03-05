@@ -15,17 +15,19 @@ export class TypeOrmCustomerRepository implements ICustomerRepository {
 
   async create(input: {
     businessId: string
-    nombre?: string
-    telefonoWhatsApp: string
-    consentimientoVoucher: boolean
+    name: string
+    whatsappE164?: string
+    notes?: string
+    isActive?: boolean
   }): Promise<Customer> {
     const saved = await this.repository.save(
       this.repository.create({
         id: crypto.randomUUID(),
         businessId: input.businessId,
-        nombre: input.nombre ?? null,
-        telefonoWhatsApp: input.telefonoWhatsApp,
-        consentimientoVoucher: input.consentimientoVoucher
+        name: input.name,
+        whatsappE164: input.whatsappE164 ?? null,
+        notes: input.notes ?? null,
+        isActive: input.isActive ?? true
       })
     )
 
@@ -35,18 +37,21 @@ export class TypeOrmCustomerRepository implements ICustomerRepository {
   async update(
     id: string,
     businessId: string,
-    input: { nombre?: string; telefonoWhatsApp?: string; consentimientoVoucher?: boolean }
+    input: { name?: string; whatsappE164?: string; notes?: string; isActive?: boolean }
   ): Promise<void> {
     const payload: Partial<CustomerTypeOrmEntity> = {}
 
-    if (input.nombre !== undefined) {
-      payload.nombre = input.nombre
+    if (input.name !== undefined) {
+      payload.name = input.name
     }
-    if (input.telefonoWhatsApp !== undefined) {
-      payload.telefonoWhatsApp = input.telefonoWhatsApp
+    if (input.whatsappE164 !== undefined) {
+      payload.whatsappE164 = input.whatsappE164
     }
-    if (input.consentimientoVoucher !== undefined) {
-      payload.consentimientoVoucher = input.consentimientoVoucher
+    if (input.notes !== undefined) {
+      payload.notes = input.notes
+    }
+    if (input.isActive !== undefined) {
+      payload.isActive = input.isActive
     }
 
     if (Object.keys(payload).length === 0) {
@@ -65,24 +70,24 @@ export class TypeOrmCustomerRepository implements ICustomerRepository {
     businessId: string
     page: number
     limit: number
-    nombre?: string
-    telefonoWhatsApp?: string
-    consentimientoVoucher?: boolean
+    name?: string
+    whatsappE164?: string
+    isActive?: boolean
   }): Promise<{ items: Customer[]; total: number }> {
     const where: Record<string, unknown> = {
       businessId: input.businessId
     }
 
-    if (input.nombre?.trim()) {
-      where.nombre = ILike(`%${input.nombre.trim()}%`)
+    if (input.name?.trim()) {
+      where.name = ILike(`%${input.name.trim()}%`)
     }
 
-    if (input.telefonoWhatsApp?.trim()) {
-      where.telefonoWhatsApp = ILike(`%${input.telefonoWhatsApp.trim()}%`)
+    if (input.whatsappE164?.trim()) {
+      where.whatsappE164 = ILike(`%${input.whatsappE164.trim()}%`)
     }
 
-    if (input.consentimientoVoucher !== undefined) {
-      where.consentimientoVoucher = input.consentimientoVoucher
+    if (input.isActive !== undefined) {
+      where.isActive = input.isActive
     }
 
     const [items, total] = await this.repository.findAndCount({

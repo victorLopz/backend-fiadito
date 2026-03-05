@@ -1,7 +1,8 @@
 import { Column, CreateDateColumn, Entity, Index, PrimaryColumn, UpdateDateColumn } from "typeorm"
 
 @Entity("customers")
-@Index(["businessId", "telefonoWhatsApp"])
+@Index(["businessId", "name"])
+@Index(["businessId", "whatsappE164"])
 export class CustomerTypeOrmEntity {
   @PrimaryColumn("uuid")
   id!: string
@@ -9,14 +10,17 @@ export class CustomerTypeOrmEntity {
   @Column("uuid", { name: "business_id" })
   businessId!: string
 
-  @Column({ type: "varchar", length: 120, nullable: true, name: "nombre" })
-  nombre!: string | null
+  @Column({ type: "varchar", length: 120, name: "name" })
+  name!: string
 
-  @Column({ type: "varchar", length: 30, name: "telefono_whatsapp" })
-  telefonoWhatsApp!: string
+  @Column({ type: "varchar", length: 30, nullable: true, name: "whatsapp_e164" })
+  whatsappE164!: string | null
 
-  @Column({ type: "boolean", name: "consentimiento_voucher" })
-  consentimientoVoucher!: boolean
+  @Column({ type: "varchar", length: 500, nullable: true, name: "notes" })
+  notes!: string | null
+
+  @Column({ type: "boolean", name: "is_active" })
+  isActive!: boolean
 
   @CreateDateColumn({ type: "timestamptz", name: "created_at" })
   createdAt!: Date

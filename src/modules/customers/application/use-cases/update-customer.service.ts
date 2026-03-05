@@ -20,9 +20,10 @@ export class UpdateCustomerService {
     }
 
     await this.customerRepository.update(id, businessId, {
-      nombre: dto.nombre,
-      telefonoWhatsApp: dto.telefonoWhatsApp,
-      consentimientoVoucher: dto.consentimientoVoucher
+      name: dto.name,
+      whatsappE164: dto.whatsappE164,
+      notes: dto.notes,
+      isActive: dto.isActive
     })
 
     const updatedCustomer = await this.customerRepository.findById(id, businessId)
@@ -32,9 +33,10 @@ export class UpdateCustomerService {
 
     return {
       id: updatedCustomer.id,
-      nombre: updatedCustomer.nombre,
-      telefonoWhatsApp: updatedCustomer.telefonoWhatsApp,
-      consentimientoVoucher: updatedCustomer.consentimientoVoucher,
+      name: updatedCustomer.name,
+      whatsappE164: updatedCustomer.whatsappE164,
+      notes: updatedCustomer.notes,
+      isActive: updatedCustomer.isActive,
       createdAt: updatedCustomer.createdAt,
       updatedAt: updatedCustomer.updatedAt
     }
