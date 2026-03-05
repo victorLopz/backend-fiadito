@@ -1,4 +1,5 @@
-import { InventoryMovementType } from "src/shared/infrastructure/persistence/entities/enums"
+import { KardexHistoryFilterDto, KardexHistoryItemDto } from "../dto/kardex-history.dto"
+import { InventoryMovementType } from "../enums/inventory-movement-type.enum"
 
 export const INVENTORY_MOVEMENT_REPOSITORY = Symbol("INVENTORY_MOVEMENT_REPOSITORY")
 
@@ -10,5 +11,9 @@ export interface InventoryMovementRepository {
     quantity: number
     reason?: string
     createdBy: string
-  }): Promise<void>
+  }): Promise<Date>
+  findKardex(
+    businessId: string,
+    filters: KardexHistoryFilterDto
+  ): Promise<{ items: KardexHistoryItemDto[]; total: number }>
 }
