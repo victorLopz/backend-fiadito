@@ -1,10 +1,13 @@
 import { Column, CreateDateColumn, Entity, Index, PrimaryColumn, UpdateDateColumn } from "typeorm"
 
 @Entity("customers")
-@Index(["telefonoWhatsApp"])
+@Index(["businessId", "telefonoWhatsApp"])
 export class CustomerTypeOrmEntity {
   @PrimaryColumn("uuid")
   id!: string
+
+  @Column("uuid")
+  businessId!: string
 
   @Column({ type: "varchar", length: 120, nullable: true })
   nombre!: string | null

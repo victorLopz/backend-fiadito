@@ -13,8 +13,9 @@ export class CreateCustomerService {
     private readonly customerRepository: ICustomerRepository
   ) {}
 
-  async execute(dto: CreateCustomerDto): Promise<CustomerOutput> {
+  async execute(dto: CreateCustomerDto, businessId: string): Promise<CustomerOutput> {
     const customer = await this.customerRepository.create({
+      businessId,
       nombre: dto.nombre,
       telefonoWhatsApp: dto.telefonoWhatsApp,
       consentimientoVoucher: dto.consentimientoVoucher

@@ -14,6 +14,7 @@ export class TypeOrmCustomerRepository implements ICustomerRepository {
   ) {}
 
   async create(input: {
+    businessId: string
     nombre?: string
     telefonoWhatsApp: string
     consentimientoVoucher: boolean
@@ -21,6 +22,7 @@ export class TypeOrmCustomerRepository implements ICustomerRepository {
     const saved = await this.repository.save(
       this.repository.create({
         id: crypto.randomUUID(),
+        businessId: input.businessId,
         nombre: input.nombre ?? null,
         telefonoWhatsApp: input.telefonoWhatsApp,
         consentimientoVoucher: input.consentimientoVoucher
@@ -32,6 +34,7 @@ export class TypeOrmCustomerRepository implements ICustomerRepository {
 
   async update(
     id: string,
+    businessId: string,
     input: { nombre?: string; telefonoWhatsApp?: string; consentimientoVoucher?: boolean }
   ): Promise<void> {
     const payload: Partial<CustomerTypeOrmEntity> = {}
@@ -50,22 +53,25 @@ export class TypeOrmCustomerRepository implements ICustomerRepository {
       return
     }
 
-    await this.repository.update({ id }, payload)
+    await this.repository.update({ id, businessId }, payload)
   }
 
-  async findById(id: string): Promise<Customer | null> {
-    const entity = await this.repository.findOne({ where: { id } })
+  async findById(id: string, businessId: string): Promise<Customer | null> {
+    const entity = await this.repository.findOne({ where: { id, businessId } })
     return entity ? CustomerMapper.toDomain(entity) : null
   }
 
   async findPaginated(input: {
+    businessId: string
     page: number
     limit: number
     nombre?: string
     telefonoWhatsApp?: string
     consentimientoVoucher?: boolean
   }): Promise<{ items: Customer[]; total: number }> {
-    const where: Record<string, unknown> = {}
+    const where: Record<string, unknown> = {
+      businessId: input.businessId
+    }
 
     if (input.nombre?.trim()) {
       where.nombre = ILike(`%${input.nombre.trim()}%`)

@@ -13,7 +13,10 @@ export class GetCustomersService {
     private readonly customerRepository: ICustomerRepository
   ) {}
 
-  async execute(query: ListCustomersQueryDto): Promise<{
+  async execute(
+    businessId: string,
+    query: ListCustomersQueryDto
+  ): Promise<{
     data: CustomerOutput[]
     page: number
     limit: number
@@ -24,6 +27,7 @@ export class GetCustomersService {
     const limit = query.limit ?? 20
 
     const { items, total } = await this.customerRepository.findPaginated({
+      businessId,
       page,
       limit,
       nombre: query.nombre,

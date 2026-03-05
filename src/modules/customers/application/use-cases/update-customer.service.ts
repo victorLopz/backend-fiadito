@@ -13,19 +13,19 @@ export class UpdateCustomerService {
     private readonly customerRepository: ICustomerRepository
   ) {}
 
-  async execute(id: string, dto: UpdateCustomerDto): Promise<CustomerOutput> {
-    const existingCustomer = await this.customerRepository.findById(id)
+  async execute(id: string, businessId: string, dto: UpdateCustomerDto): Promise<CustomerOutput> {
+    const existingCustomer = await this.customerRepository.findById(id, businessId)
     if (!existingCustomer) {
       throw new NotFoundException("Customer not found")
     }
 
-    await this.customerRepository.update(id, {
+    await this.customerRepository.update(id, businessId, {
       nombre: dto.nombre,
       telefonoWhatsApp: dto.telefonoWhatsApp,
       consentimientoVoucher: dto.consentimientoVoucher
     })
 
-    const updatedCustomer = await this.customerRepository.findById(id)
+    const updatedCustomer = await this.customerRepository.findById(id, businessId)
     if (!updatedCustomer) {
       throw new NotFoundException("Customer not found")
     }

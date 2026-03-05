@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query, UseGuards } from "@nestjs/common"
+import { BusinessId } from "src/shared/common/decorators"
 import { JwtAuthGuard } from "src/shared/common/guards/jwt-auth.guard"
 import { CreateCustomerDto } from "../../application/dto/create-customer.dto"
 import { ListCustomersQueryDto } from "../../application/dto/list-customers-query.dto"
@@ -17,17 +18,21 @@ export class CustomersController {
   ) {}
 
   @Post()
-  create(@Body() dto: CreateCustomerDto) {
-    return this.createCustomerService.execute(dto)
+  create(@Body() dto: CreateCustomerDto, @BusinessId() businessId: string) {
+    return this.createCustomerService.execute(dto, businessId)
   }
 
   @Patch(":id")
-  update(@Param("id", ParseUUIDPipe) id: string, @Body() dto: UpdateCustomerDto) {
-    return this.updateCustomerService.execute(id, dto)
+  update(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: UpdateCustomerDto,
+    @BusinessId() businessId: string
+  ) {
+    return this.updateCustomerService.execute(id, businessId, dto)
   }
 
   @Get()
-  list(@Query() query: ListCustomersQueryDto) {
-    return this.getCustomersService.execute(query)
+  list(@BusinessId() businessId: string, @Query() query: ListCustomersQueryDto) {
+    return this.getCustomersService.execute(businessId, query)
   }
 }
