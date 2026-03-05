@@ -5,6 +5,7 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler"
 import { TypeOrmModule } from "@nestjs/typeorm"
 import { AuthModule } from "./modules/auth/auth.module"
 import { DebtsModule } from "./modules/debts/debts.module"
+import { CustomersModule } from "./modules/customers/customers.module"
 import { InventoryModule } from "./modules/inventory/inventory.module"
 import { SalesModule } from "./modules/sales/sales.module"
 import { BusinessContextMiddleware } from "./shared/common/middlewares"
@@ -31,7 +32,8 @@ import { TYPEORM_ENTITIES } from "./shared/infrastructure/persistence/entities"
     AuthModule,
     InventoryModule,
     SalesModule,
-    DebtsModule
+    DebtsModule,
+    CustomersModule
   ],
   controllers: [],
   providers: [

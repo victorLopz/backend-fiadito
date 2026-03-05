@@ -1,0 +1,23 @@
+import { Module } from "@nestjs/common"
+import { TypeOrmModule } from "@nestjs/typeorm"
+import { CreateCustomerService } from "./application/use-cases/create-customer.service"
+import { GetCustomersService } from "./application/use-cases/get-customers.service"
+import { UpdateCustomerService } from "./application/use-cases/update-customer.service"
+import { CUSTOMER_REPOSITORY } from "./domain/repositories/customer.repository"
+import { CustomerTypeOrmEntity } from "./infrastructure/persistence/entities/customer.typeorm-entity"
+import { TypeOrmCustomerRepository } from "./infrastructure/persistence/repositories/typeorm-customer.repository"
+import { CustomersController } from "./presentation/controllers/customers.controller"
+
+@Module({
+  imports: [TypeOrmModule.forFeature([CustomerTypeOrmEntity])],
+  controllers: [CustomersController],
+  providers: [
+    CreateCustomerService,
+    UpdateCustomerService,
+    GetCustomersService,
+    TypeOrmCustomerRepository,
+    { provide: CUSTOMER_REPOSITORY, useExisting: TypeOrmCustomerRepository }
+  ],
+  exports: [CreateCustomerService, UpdateCustomerService, GetCustomersService]
+})
+export class CustomersModule {}
