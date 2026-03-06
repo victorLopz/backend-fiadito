@@ -29,11 +29,12 @@ export class ListSalesUseCase {
     })
 
     return {
-      data: items.map((sale) => ({
+      data: items.map(({ sale, customerName }) => ({
         id: sale.id,
         receiptNumber: sale.receiptNumber,
         type: sale.type,
         customerId: sale.customerId,
+        customerName,
         subtotal: sale.subtotal,
         discountTotal: sale.discountTotal,
         total: sale.total,

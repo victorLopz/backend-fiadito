@@ -11,8 +11,13 @@ export interface SaleHistoryFilters {
   limit: number
 }
 
+export interface SaleHistoryEntry {
+  sale: Sale
+  customerName?: string
+}
+
 export interface SaleHistoryResult {
-  items: Sale[]
+  items: SaleHistoryEntry[]
   total: number
 }
 

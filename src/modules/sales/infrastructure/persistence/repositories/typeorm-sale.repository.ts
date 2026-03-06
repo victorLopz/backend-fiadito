@@ -6,6 +6,7 @@ import { SaleMapper } from "src/modules/sales/infrastructure/persistence/mappers
 import { Between, EntityManager, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual, Repository } from "typeorm"
 import { SaleItemTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/sale-item.typeorm-entity"
 import { SaleTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/sale.typeorm-entity"
+import { CustomerTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/customers.typeorm-entity"
 
 @Injectable()
 export class TypeOrmSaleRepository implements ISaleRepository {
@@ -14,6 +15,8 @@ export class TypeOrmSaleRepository implements ISaleRepository {
     private readonly salesRepository: Repository<SaleTypeOrmEntity>,
     @InjectRepository(SaleItemTypeOrmEntity)
     private readonly saleItemsRepository: Repository<SaleItemTypeOrmEntity>,
+    @InjectRepository(CustomerTypeOrmEntity)
+    private readonly customerRepository: Repository<CustomerTypeOrmEntity>,
     private readonly saleMapper: SaleMapper
   ) {}
 
@@ -64,8 +67,24 @@ export class TypeOrmSaleRepository implements ISaleRepository {
       itemsBySaleId.set(item.saleId, existing)
     }
 
+    const customerIds = [...new Set(sales.map((sale) => sale.customerId).filter((id): id is string => !!id))]
+    const customers =
+      customerIds.length > 0
+        ? await this.customerRepository.find({
+            where: {
+              businessId: filters.businessId,
+              id: In(customerIds)
+            }
+          })
+        : []
+
+    const customerNameById = new Map(customers.map((customer) => [customer.id, customer.name]))
+
     return {
-      items: sales.map((sale) => this.saleMapper.toDomain(sale, itemsBySaleId.get(sale.id) ?? [])),
+      items: sales.map((sale) => ({
+        sale: this.saleMapper.toDomain(sale, itemsBySaleId.get(sale.id) ?? []),
+        customerName: sale.customerId ? customerNameById.get(sale.customerId) : undefined
+      })),
       total
     }
   }

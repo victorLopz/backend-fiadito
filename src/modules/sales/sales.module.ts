@@ -11,9 +11,14 @@ import { TypeOrmSaleRepository } from "src/modules/sales/infrastructure/persiste
 import { SalesController } from "src/modules/sales/presentation/controllers/sales.controller"
 import { SaleItemTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/sale-item.typeorm-entity"
 import { SaleTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/sale.typeorm-entity"
+import { CustomerTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/customers.typeorm-entity"
 
 @Module({
-  imports: [AuthModule, InventoryModule, TypeOrmModule.forFeature([SaleTypeOrmEntity, SaleItemTypeOrmEntity])],
+  imports: [
+    AuthModule,
+    InventoryModule,
+    TypeOrmModule.forFeature([SaleTypeOrmEntity, SaleItemTypeOrmEntity, CustomerTypeOrmEntity])
+  ],
   controllers: [SalesController],
   providers: [
     CreateSaleUseCase,
