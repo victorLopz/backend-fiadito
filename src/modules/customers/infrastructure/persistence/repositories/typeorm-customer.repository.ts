@@ -102,4 +102,29 @@ export class TypeOrmCustomerRepository implements ICustomerRepository {
       total
     }
   }
+
+  async findForSelect(input: {
+    businessId: string
+    isActive?: boolean
+    name?: string
+  }): Promise<Customer[]> {
+    const where: Record<string, unknown> = {
+      businessId: input.businessId
+    }
+
+    if (input.isActive !== undefined) {
+      where.isActive = input.isActive
+    }
+
+    if (input.name?.trim()) {
+      where.name = ILike(`%${input.name.trim()}%`)
+    }
+
+    const items = await this.repository.find({
+      where,
+      order: { name: "ASC" }
+    })
+
+    return items.map((item) => CustomerMapper.toDomain(item))
+  }
 }

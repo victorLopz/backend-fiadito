@@ -24,4 +24,9 @@ export interface ICustomerRepository {
     whatsappE164?: string
     isActive?: boolean
   }): Promise<{ items: Customer[]; total: number }>
+  findForSelect(input: {
+    businessId: string
+    isActive?: boolean
+    name?: string
+  }): Promise<Customer[]>
 }
