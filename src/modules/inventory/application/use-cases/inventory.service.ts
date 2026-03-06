@@ -12,7 +12,16 @@ import {
   ProductRepository
 } from "src/modules/inventory/domain/repositories/product.repository"
 import { InventoryMovementType } from "src/shared/infrastructure/persistence/entities/enums"
+import { InventoryMovementTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/inventory-movement.typeorm-entity"
 import { ProductTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/product.typeorm-entity"
+import { EntityManager } from "typeorm"
+
+export interface SaleInventoryProductSnapshot {
+  id: string
+  price: number
+  cost: number
+  stockCurrent: number
+}
 
 @Injectable()
 export class InventoryService {
@@ -208,6 +217,85 @@ export class InventoryService {
       limit,
       total,
       totalPages: Math.ceil(total / limit)
+    }
+  }
+
+  async getProductsSnapshotForSale(
+    businessId: string,
+    productIds: string[],
+    manager: EntityManager
+  ): Promise<Map<string, SaleInventoryProductSnapshot>> {
+    if (productIds.length === 0) {
+      return new Map<string, SaleInventoryProductSnapshot>()
+    }
+
+    const uniqueProductIds = [...new Set(productIds)]
+    const products = await manager.getRepository(ProductTypeOrmEntity).find({
+      where: uniqueProductIds.map((id) => ({ id, businessId, isActive: true }))
+    })
+
+    return new Map(
+      products.map((product) => [
+        product.id,
+        {
+          id: product.id,
+          price: Number(product.price),
+          cost: Number(product.cost),
+          stockCurrent: product.stockCurrent
+        }
+      ])
+    )
+  }
+
+  async assertStockAvailability(
+    businessId: string,
+    requiredByProduct: Map<string, number>,
+    manager: EntityManager
+  ): Promise<void> {
+    const productIds = [...requiredByProduct.keys()]
+    const products = await this.getProductsSnapshotForSale(businessId, productIds, manager)
+
+    for (const [productId, requiredQuantity] of requiredByProduct.entries()) {
+      const product = products.get(productId)
+      if (!product) {
+        throw new NotFoundException(`Product ${productId} not found or inactive`)
+      }
+      if (product.stockCurrent < requiredQuantity) {
+        throw new BadRequestException(`Insufficient stock for product ${productId}`)
+      }
+    }
+  }
+
+  async discountStockForSale(
+    businessId: string,
+    saleId: string,
+    userId: string,
+    requiredByProduct: Map<string, number>,
+    manager: EntityManager
+  ): Promise<void> {
+    for (const [productId, quantity] of requiredByProduct.entries()) {
+      const productRepo = manager.getRepository(ProductTypeOrmEntity)
+      const product = await productRepo.findOne({ where: { id: productId, businessId, isActive: true } })
+      if (!product) {
+        throw new NotFoundException(`Product ${productId} not found or inactive`)
+      }
+
+      if (product.stockCurrent < quantity) {
+        throw new BadRequestException(`Insufficient stock for product ${productId}`)
+      }
+
+      product.stockCurrent -= quantity
+      await productRepo.save(product)
+
+      await manager.getRepository(InventoryMovementTypeOrmEntity).save({
+        businessId,
+        productId,
+        type: InventoryMovementType.OUT,
+        quantity,
+        reason: `SALE ${saleId}`,
+        createdBy: userId,
+        createdAt: new Date()
+      })
     }
   }
 

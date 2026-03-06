@@ -37,6 +37,6 @@ export class SaleTypeOrmEntity {
   @Column({ type: "text", nullable: true })
   notes?: string
 
-  @CreateDateColumn({ type: "timestamptz" })
+  @CreateDateColumn({ type: "timestamptz", name: "created_at" })
   createdAt!: Date
 }
