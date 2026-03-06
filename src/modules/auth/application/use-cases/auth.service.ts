@@ -2,6 +2,7 @@ import { createCipheriv, createHash, randomBytes, randomUUID } from "crypto"
 import * as argon2 from "argon2"
 import { BadRequestException, Inject, Injectable, UnauthorizedException } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
+import { JwtService } from "@nestjs/jwt"
 import {
   BUSINESS_REPOSITORY,
   BusinessRepository
@@ -66,10 +67,9 @@ export class AuthService {
   private readonly otpRegex = /^\+[1-9]\d{6,14}$/
   private readonly otpTtlMs = 5 * 60 * 1000
   private readonly otpMaxAttempts = 5
-  private readonly accessExpiresInSeconds = 900
+  private readonly accessExpiresInSeconds: number
   private readonly refreshTtlMs = 30 * 24 * 60 * 60 * 1000
   private readonly loginByOtpEnabled: boolean
-  private readonly accessTokenSecret: string
 
   constructor(
     @Inject(USER_REPOSITORY)
@@ -82,11 +82,13 @@ export class AuthService {
     private readonly tokenRepository: TokenRepository,
     @Inject(SESSION_REPOSITORY)
     private readonly sessionRepository: SessionRepository,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly jwtService: JwtService
   ) {
     this.loginByOtpEnabled = this.configService.get<string>("AUTH_LOGIN_WITH_OTP") === "true"
-    this.accessTokenSecret =
-      this.configService.get<string>("JWT_ACCESS_SECRET") ?? "access-dev-secret"
+    this.accessExpiresInSeconds = parseInt(
+      this.configService.get<string>("JWT_ACCESS_EXPIRES_IN") || "900"
+    )
   }
 
   async createUser(input: CreateUserInput): Promise<{
@@ -251,9 +253,12 @@ export class AuthService {
     return { session: session.session }
   }
 
-  async refreshToken(
-    rotationToken: string
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  async refreshToken(rotationToken: string): Promise<{
+    accessToken: string
+    refreshToken: string
+    expiresIn: number
+    tokenType: "Bearer"
+  }> {
     const [tokenId, secret] = rotationToken.split(".")
     if (!tokenId || !secret) {
       throw new UnauthorizedException("Invalid refresh token format")
@@ -294,7 +299,9 @@ export class AuthService {
         phone: user.phoneE164,
         isActive: user.isActive
       }),
-      refreshToken: `${next.id}.${nextSecret}`
+      refreshToken: `${next.id}.${nextSecret}`,
+      expiresIn: this.accessExpiresInSeconds,
+      tokenType: "Bearer"
     }
   }
 
@@ -369,20 +376,16 @@ export class AuthService {
   }
 
   private generateAccessToken(user: AuthenticatedUser): string {
-    const payload = Buffer.from(
-      JSON.stringify({
+    return this.jwtService.sign(
+      {
         sub: user.id,
-        businessId: user.businessId,
-        iat: Date.now()
-      })
-    ).toString("base64url")
-
-    const signature = createHash("sha256")
-      .update(payload)
-      .update(this.accessTokenSecret)
-      .digest("hex")
-
-    return `${payload}.${signature}`
+        businessId: user.businessId
+      },
+      {
+        algorithm: "HS256",
+        expiresIn: `${this.accessExpiresInSeconds}s`
+      }
+    )
   }
 
   private encryptOtpForSms(code: string, destinationMobile: string): string {

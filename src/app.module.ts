@@ -8,6 +8,7 @@ import { DebtsModule } from "./modules/debts/debts.module"
 import { CustomersModule } from "./modules/customers/customers.module"
 import { InventoryModule } from "./modules/inventory/inventory.module"
 import { SalesModule } from "./modules/sales/sales.module"
+import { JwtAuthGuard } from "./shared/common/guards/jwt-auth.guard"
 import { BusinessContextMiddleware } from "./shared/common/middlewares"
 import { TYPEORM_ENTITIES } from "./shared/infrastructure/persistence/entities"
 
@@ -41,6 +42,10 @@ import { TYPEORM_ENTITIES } from "./shared/infrastructure/persistence/entities"
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard
     }
   ]
 })

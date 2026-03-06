@@ -1,10 +1,11 @@
-import { Body, Controller, Post, UseGuards } from "@nestjs/common"
+import { Body, Controller, Post } from "@nestjs/common"
 import { Throttle } from "@nestjs/throttler"
 import { AuthService } from "../../application/use-cases/auth.service"
-import { JwtAuthGuard } from "src/shared/common/guards/jwt-auth.guard"
+import { Public } from "src/shared/common/decorators"
 import { UserRole } from "src/shared/infrastructure/persistence/entities/enums"
 
 @Controller("auth")
+@Public()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
@@ -43,7 +44,6 @@ export class AuthController {
   }
 
   @Post("refresh")
-  @UseGuards(JwtAuthGuard)
   refresh(@Body() body: { refreshToken: string }) {
     return this.authService.refreshToken(body.refreshToken)
   }

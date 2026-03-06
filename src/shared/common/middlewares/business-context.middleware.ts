@@ -1,26 +1,16 @@
-import { createHash } from "crypto"
 import { Injectable, NestMiddleware } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
+import { JwtService } from "@nestjs/jwt"
 import { NextFunction, Request, Response } from "express"
+import { AccessTokenPayload } from "src/modules/auth/domain/services/token.service"
 import { AuthUser } from "../interfaces"
-
-type TokenPayload = {
-  sub?: string
-  businessId?: string
-  iat?: number
-  fullName?: string
-  email?: string
-  phone?: string
-}
 
 @Injectable()
 export class BusinessContextMiddleware implements NestMiddleware {
-  private readonly accessTokenSecret: string
-
-  constructor(private readonly configService: ConfigService) {
-    this.accessTokenSecret =
-      this.configService.get<string>("JWT_ACCESS_SECRET") ?? "access-dev-secret"
-  }
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly jwtService: JwtService
+  ) {}
 
   use(req: Request, _: Response, next: NextFunction): void {
     const authorization = req.headers.authorization
@@ -40,9 +30,7 @@ export class BusinessContextMiddleware implements NestMiddleware {
       ...(parsed.sub ? { id: parsed.sub } : {}),
       businessId: parsed.businessId,
       ...(parsed.iat ? { iat: parsed.iat } : {}),
-      ...(parsed.fullName ? { fullName: parsed.fullName } : {}),
-      ...(parsed.email ? { email: parsed.email } : {}),
-      ...(parsed.phone ? { phone: parsed.phone } : {})
+      ...(parsed.exp ? { exp: parsed.exp } : {})
     }
 
     req.businessId = parsed.businessId
@@ -51,26 +39,16 @@ export class BusinessContextMiddleware implements NestMiddleware {
     return next()
   }
 
-  private parseAndValidateToken(token: string): TokenPayload | null {
-    const [encodedPayload, signature] = token.split(".")
-    if (!encodedPayload || !signature) {
-      return null
-    }
-
-    const expectedSignature = createHash("sha256")
-      .update(encodedPayload)
-      .update(this.accessTokenSecret)
-      .digest("hex")
-    if (expectedSignature !== signature) {
-      return null
-    }
-
+  private parseAndValidateToken(token: string): AccessTokenPayload | null {
     try {
-      const raw = Buffer.from(encodedPayload, "base64url").toString("utf8")
-      const payload = JSON.parse(raw) as TokenPayload
-      if (!payload.businessId || typeof payload.businessId !== "string") {
+      const payload = this.jwtService.verify<AccessTokenPayload>(token, {
+        secret: this.configService.get<string>("JWT_ACCESS_SECRET") ?? "access-dev-secret",
+        algorithms: ["HS256"]
+      })
+      if (!payload.sub || !payload.businessId) {
         return null
       }
+
       return payload
     } catch {
       return null

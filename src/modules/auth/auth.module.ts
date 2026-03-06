@@ -1,4 +1,7 @@
 import { Module } from "@nestjs/common"
+import { ConfigModule, ConfigService } from "@nestjs/config"
+import { JwtModule } from "@nestjs/jwt"
+import { PassportModule } from "@nestjs/passport"
 import { TypeOrmModule } from "@nestjs/typeorm"
 import { AuthService } from "./application/use-cases/auth.service"
 import { BUSINESS_REPOSITORY } from "./domain/repositories/business.repository"
@@ -6,13 +9,12 @@ import { OTP_REPOSITORY } from "./domain/repositories/otp.repository"
 import { SESSION_REPOSITORY } from "./domain/repositories/session.repository"
 import { TOKEN_REPOSITORY } from "./domain/repositories/token.repository"
 import { USER_REPOSITORY } from "./domain/repositories/user.repository"
-import { TOKEN_SERVICE } from "./domain/services/token.service"
 import { TypeOrmBusinessRepository } from "./infrastructure/repositories/typeorm-business.repository"
 import { TypeOrmOtpRepository } from "./infrastructure/repositories/typeorm-otp.repository"
 import { TypeOrmSessionRepository } from "./infrastructure/repositories/typeorm-session.repository"
 import { TypeOrmTokenRepository } from "./infrastructure/repositories/typeorm-token.repository"
 import { TypeOrmUserRepository } from "./infrastructure/repositories/typeorm-user.repository"
-import { HashTokenService } from "./infrastructure/services/hash-token.service"
+import { JwtStrategy } from "./infrastructure/strategies/jwt.strategy"
 import { AuthController } from "./presentation/controllers/auth.controller"
 import { JwtAuthGuard } from "src/shared/common/guards/jwt-auth.guard"
 import { AuthTokenTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/auth-token.typeorm-entity"
@@ -23,6 +25,18 @@ import { UserTypeOrmEntity } from "src/shared/infrastructure/persistence/entitie
 
 @Module({
   imports: [
+    ConfigModule,
+    PassportModule.register({ defaultStrategy: "jwt" }),
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>("JWT_ACCESS_SECRET") ?? "access-dev-secret",
+        signOptions: {
+          algorithm: "HS256",
+          expiresIn: configService.get<string>("JWT_ACCESS_EXPIRES_IN")
+        }
+      })
+    }),
     TypeOrmModule.forFeature([
       UserTypeOrmEntity,
       BusinessTypeOrmEntity,
@@ -39,15 +53,14 @@ import { UserTypeOrmEntity } from "src/shared/infrastructure/persistence/entitie
     TypeOrmOtpRepository,
     TypeOrmTokenRepository,
     TypeOrmSessionRepository,
-    HashTokenService,
+    JwtStrategy,
     JwtAuthGuard,
     { provide: USER_REPOSITORY, useExisting: TypeOrmUserRepository },
     { provide: BUSINESS_REPOSITORY, useExisting: TypeOrmBusinessRepository },
     { provide: OTP_REPOSITORY, useExisting: TypeOrmOtpRepository },
     { provide: TOKEN_REPOSITORY, useExisting: TypeOrmTokenRepository },
-    { provide: SESSION_REPOSITORY, useExisting: TypeOrmSessionRepository },
-    { provide: TOKEN_SERVICE, useExisting: HashTokenService }
+    { provide: SESSION_REPOSITORY, useExisting: TypeOrmSessionRepository }
   ],
-  exports: [AuthService, USER_REPOSITORY, TOKEN_SERVICE, JwtAuthGuard]
+  exports: [AuthService, USER_REPOSITORY, PassportModule, JwtModule, JwtAuthGuard]
 })
 export class AuthModule {}
