@@ -7,26 +7,35 @@ export class SaleTypeOrmEntity {
   @PrimaryGeneratedColumn("uuid")
   id!: string
 
-  @Column("uuid")
+  @Column("uuid", { name: "business_id" })
   businessId!: string
 
-  @Column("uuid")
-  userId!: string
-
-  @Column("uuid", { nullable: true })
-  clientId?: string
+  @Column({ name: "receipt_number", nullable: true })
+  receiptNumber?: string
 
   @Column({ type: "enum", enum: SaleType })
   type!: SaleType
 
+  @Column("uuid", { name: "customer_id", nullable: true })
+  customerId?: string
+
+  @Column("uuid", { name: "created_by" })
+  createdBy!: string
+
   @Column({ type: "numeric", precision: 14, scale: 2 })
   subtotal!: string
 
-  @Column({ type: "numeric", precision: 14, scale: 2, default: "0" })
+  @Column({ type: "numeric", precision: 14, scale: 2, default: "0", name: "discount_total" })
   discountTotal!: string
 
   @Column({ type: "numeric", precision: 14, scale: 2 })
   total!: string
+
+  @Column({ type: "int", name: "items_count" })
+  itemsCount!: number
+
+  @Column({ type: "text", nullable: true })
+  notes?: string
 
   @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date

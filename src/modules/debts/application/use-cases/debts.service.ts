@@ -39,7 +39,7 @@ export class DebtsService {
       }
 
       const sale = await saleRepo.findOne({ where: { id: debt.saleId } })
-      const paymentUserId = userId ?? sale?.userId
+      const paymentUserId = userId ?? sale?.createdBy
       if (!paymentUserId) {
         throw new BadRequestException("userId is required to register payment")
       }
