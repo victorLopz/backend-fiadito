@@ -14,30 +14,30 @@ export class DebtTypeOrmEntity {
   @PrimaryGeneratedColumn("uuid")
   id!: string
 
-  @Column("uuid")
+  @Column("uuid", { name: "business_id" })
   businessId!: string
 
-  @Column("uuid")
+  @Column("uuid", { name: "sale_id" })
   saleId!: string
 
-  @Column("uuid")
+  @Column("uuid", { name: "client_id" })
   clientId!: string
 
-  @Column({ type: "numeric", precision: 14, scale: 2 })
-  totalAmount!: string
+  @Column({ type: "numeric", precision: 14, scale: 2, name: "total_due" })
+  totalDue!: string
 
-  @Column({ type: "numeric", precision: 14, scale: 2 })
-  paidAmount!: string
-
-  @Column({ type: "numeric", precision: 14, scale: 2 })
+  @Column({ type: "numeric", precision: 14, scale: 2, name: "balance" })
   balance!: string
 
   @Column({ type: "enum", enum: DebtStatus, default: DebtStatus.OPEN })
   status!: DebtStatus
 
-  @CreateDateColumn({ type: "timestamptz" })
+  @Column({ type: "date", name: "due_date" })
+  dueDate!: string
+
+  @CreateDateColumn({ type: "timestamptz", name: "created_at" })
   createdAt!: Date
 
-  @UpdateDateColumn({ type: "timestamptz" })
+  @UpdateDateColumn({ type: "timestamptz", name: "updated_at" })
   updatedAt!: Date
 }

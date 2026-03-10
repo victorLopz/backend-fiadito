@@ -53,9 +53,9 @@ export class DebtsService {
         })
       )
 
-      const nextPaid = Number(debt.paidAmount) + amount
-      const totalAmount = Number(debt.totalAmount)
-      const nextBalance = Math.max(0, totalAmount - nextPaid)
+      const totalDue = Number(debt.totalDue)
+      const nextBalance = Math.max(0, Number(debt.balance) - amount)
+      const nextPaid = totalDue - nextBalance
 
       const nextStatus =
         nextBalance === 0 ? DebtStatus.PAID : nextPaid > 0 ? DebtStatus.PARTIAL : DebtStatus.OPEN
@@ -63,7 +63,6 @@ export class DebtsService {
       await debtRepo.update(
         { id: debt.id },
         {
-          paidAmount: this.toMoney(nextPaid),
           balance: this.toMoney(nextBalance),
           status: nextStatus
         }
@@ -98,10 +97,11 @@ export class DebtsService {
       businessId: debt.businessId,
       saleId: debt.saleId,
       clientId: debt.clientId,
-      totalAmount: Number(debt.totalAmount),
-      paidAmount: Number(debt.paidAmount),
+      totalDue: Number(debt.totalDue),
+      paidAmount: Number(debt.totalDue) - Number(debt.balance),
       balance: Number(debt.balance),
       status: debt.status,
+      dueDate: debt.dueDate,
       createdAt: debt.createdAt,
       updatedAt: debt.updatedAt
     }))

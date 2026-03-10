@@ -60,7 +60,7 @@ export class InitialSchema1730000000000 implements MigrationInterface {
       `CREATE TABLE "vouchers" ("id" uuid PRIMARY KEY DEFAULT gen_random_uuid(), "businessId" uuid NOT NULL, "saleId" uuid NOT NULL UNIQUE, "imageUrl" varchar NOT NULL, "createdAt" timestamptz NOT NULL DEFAULT now())`
     )
     await queryRunner.query(
-      `CREATE TABLE "debts" ("id" uuid PRIMARY KEY DEFAULT gen_random_uuid(), "businessId" uuid NOT NULL, "saleId" uuid NOT NULL, "clientId" uuid NOT NULL, "totalAmount" numeric(14,2) NOT NULL, "paidAmount" numeric(14,2) NOT NULL, "balance" numeric(14,2) NOT NULL, "status" "public"."debts_status_enum" NOT NULL DEFAULT 'OPEN', "createdAt" timestamptz NOT NULL DEFAULT now(), "updatedAt" timestamptz NOT NULL DEFAULT now())`
+      `CREATE TABLE "debts" ("id" uuid PRIMARY KEY DEFAULT gen_random_uuid(), "business_id" uuid NOT NULL, "sale_id" uuid NOT NULL, "client_id" uuid NOT NULL, "total_due" numeric(14,2) NOT NULL, "balance" numeric(14,2) NOT NULL, "status" "public"."debts_status_enum" NOT NULL DEFAULT 'OPEN', "due_date" date NOT NULL, "created_at" timestamptz NOT NULL DEFAULT now(), "updated_at" timestamptz NOT NULL DEFAULT now())`
     )
     await queryRunner.query(
       `CREATE TABLE "debt_payments" ("id" uuid PRIMARY KEY DEFAULT gen_random_uuid(), "businessId" uuid NOT NULL, "debtId" uuid NOT NULL, "amount" numeric(14,2) NOT NULL, "userId" uuid NOT NULL, "createdAt" timestamptz NOT NULL DEFAULT now())`

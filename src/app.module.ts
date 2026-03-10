@@ -4,6 +4,7 @@ import { APP_GUARD } from "@nestjs/core"
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler"
 import { TypeOrmModule } from "@nestjs/typeorm"
 import { AuthModule } from "./modules/auth/auth.module"
+import { DashboardModule } from "./modules/dashboard/dashboard.module"
 import { DebtsModule } from "./modules/debts/debts.module"
 import { CustomersModule } from "./modules/customers/customers.module"
 import { InventoryModule } from "./modules/inventory/inventory.module"
@@ -32,6 +33,7 @@ import { TYPEORM_ENTITIES } from "./shared/infrastructure/persistence/entities"
       })
     }),
     AuthModule,
+    DashboardModule,
     InventoryModule,
     SalesModule,
     DebtsModule,
