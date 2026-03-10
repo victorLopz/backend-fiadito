@@ -12,22 +12,30 @@ import { SalesController } from "src/modules/sales/presentation/controllers/sale
 import { SaleItemTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/sale-item.typeorm-entity"
 import { SaleTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/sale.typeorm-entity"
 import { CustomerTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/customers.typeorm-entity"
+import { ProductTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/product.typeorm-entity"
+import { FindOneSaleUseCase } from "./application/use-cases/find-one-sales.use-case"
 
 @Module({
   imports: [
     AuthModule,
     InventoryModule,
-    TypeOrmModule.forFeature([SaleTypeOrmEntity, SaleItemTypeOrmEntity, CustomerTypeOrmEntity])
+    TypeOrmModule.forFeature([
+      SaleTypeOrmEntity,
+      SaleItemTypeOrmEntity,
+      CustomerTypeOrmEntity,
+      ProductTypeOrmEntity
+    ])
   ],
   controllers: [SalesController],
   providers: [
     CreateSaleUseCase,
     ListSalesUseCase,
+    FindOneSaleUseCase,
     VoucherImgAdapter,
     SaleMapper,
     TypeOrmSaleRepository,
     { provide: SALE_REPOSITORY, useExisting: TypeOrmSaleRepository }
   ],
-  exports: [CreateSaleUseCase, ListSalesUseCase]
+  exports: [CreateSaleUseCase, ListSalesUseCase, FindOneSaleUseCase]
 })
 export class SalesModule {}

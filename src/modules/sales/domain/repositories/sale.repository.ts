@@ -16,6 +16,20 @@ export interface SaleHistoryEntry {
   customerName?: string
 }
 
+export interface SaleDetailItem {
+  productId: string
+  productName?: string
+  quantity: number
+  price: number
+  discount: number
+}
+
+export interface SaleDetailResult {
+  sale: Sale
+  customerName?: string
+  items: SaleDetailItem[]
+}
+
 export interface SaleHistoryResult {
   items: SaleHistoryEntry[]
   total: number
@@ -24,4 +38,5 @@ export interface SaleHistoryResult {
 export interface ISaleRepository {
   create(sale: Sale, manager: EntityManager): Promise<Sale>
   findHistory(filters: SaleHistoryFilters): Promise<SaleHistoryResult>
+  findById(saleId: string, businessId: string): Promise<SaleDetailResult | null>
 }

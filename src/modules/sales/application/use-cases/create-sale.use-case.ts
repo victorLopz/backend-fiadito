@@ -1,10 +1,19 @@
 import { BadRequestException, Inject, Injectable } from "@nestjs/common"
 import { DataSource } from "typeorm"
-import { InventoryService, SaleInventoryProductSnapshot } from "src/modules/inventory/application/use-cases/inventory.service"
-import { CreateSaleDto, CreateSaleItemInputDto } from "src/modules/sales/application/dto/create-sale.dto"
+import {
+  InventoryService,
+  SaleInventoryProductSnapshot
+} from "src/modules/inventory/application/use-cases/inventory.service"
+import {
+  CreateSaleDto,
+  CreateSaleItemInputDto
+} from "src/modules/sales/application/dto/create-sale.dto"
 import { Sale } from "src/modules/sales/domain/entities/sale.entity"
 import { SaleItem } from "src/modules/sales/domain/entities/sale-item.entity"
-import { ISaleRepository, SALE_REPOSITORY } from "src/modules/sales/domain/repositories/sale.repository"
+import {
+  ISaleRepository,
+  SALE_REPOSITORY
+} from "src/modules/sales/domain/repositories/sale.repository"
 import { VoucherImgAdapter } from "src/modules/sales/infrastructure/adapters/voucher-img.adapter"
 
 @Injectable()
@@ -17,7 +26,11 @@ export class CreateSaleUseCase {
     private readonly voucherImgAdapter: VoucherImgAdapter
   ) {}
 
-  async execute(dto: CreateSaleDto, businessId: string, userId: string): Promise<Record<string, unknown>> {
+  async execute(
+    dto: CreateSaleDto,
+    businessId: string,
+    userId: string
+  ): Promise<Record<string, unknown>> {
     if (!businessId || !userId) {
       throw new BadRequestException("businessId and userId are required")
     }

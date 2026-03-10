@@ -6,13 +6,15 @@ import { ListSalesUseCase } from "src/modules/sales/application/use-cases/list-s
 import { BusinessId, CurrentUser } from "src/shared/common/decorators"
 import { JwtAuthGuard } from "src/shared/common/guards/jwt-auth.guard"
 import { AuthUser } from "src/shared/common/interfaces"
+import { FindOneSaleUseCase } from "../../application/use-cases/find-one-sales.use-case"
 
 @Controller("sales")
 @UseGuards(JwtAuthGuard)
 export class SalesController {
   constructor(
     private readonly createSaleUseCase: CreateSaleUseCase,
-    private readonly listSalesUseCase: ListSalesUseCase
+    private readonly listSalesUseCase: ListSalesUseCase,
+    private readonly findOneSaleUseCase: FindOneSaleUseCase
   ) {}
 
   @Post()
@@ -27,5 +29,10 @@ export class SalesController {
   @Get()
   list(@BusinessId() businessId: string, @Query() query: ListSalesQueryDto) {
     return this.listSalesUseCase.execute(businessId, query)
+  }
+
+  @Get(":id")
+  findOne(@BusinessId() businessId: string, @Query("id") saleId: string) {
+    return this.findOneSaleUseCase.execute(businessId, saleId)
   }
 }

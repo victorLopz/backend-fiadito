@@ -1,12 +1,26 @@
 import { Injectable } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
-import { ISaleRepository, SaleHistoryFilters, SaleHistoryResult } from "src/modules/sales/domain/repositories/sale.repository"
+import {
+  ISaleRepository,
+  SaleDetailResult,
+  SaleHistoryFilters,
+  SaleHistoryResult
+} from "src/modules/sales/domain/repositories/sale.repository"
 import { Sale } from "src/modules/sales/domain/entities/sale.entity"
 import { SaleMapper } from "src/modules/sales/infrastructure/persistence/mappers/sale.mapper"
-import { Between, EntityManager, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual, Repository } from "typeorm"
+import {
+  Between,
+  EntityManager,
+  FindOptionsWhere,
+  In,
+  LessThanOrEqual,
+  MoreThanOrEqual,
+  Repository
+} from "typeorm"
 import { SaleItemTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/sale-item.typeorm-entity"
 import { SaleTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/sale.typeorm-entity"
 import { CustomerTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/customers.typeorm-entity"
+import { ProductTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/product.typeorm-entity"
 
 @Injectable()
 export class TypeOrmSaleRepository implements ISaleRepository {
@@ -17,6 +31,8 @@ export class TypeOrmSaleRepository implements ISaleRepository {
     private readonly saleItemsRepository: Repository<SaleItemTypeOrmEntity>,
     @InjectRepository(CustomerTypeOrmEntity)
     private readonly customerRepository: Repository<CustomerTypeOrmEntity>,
+    @InjectRepository(ProductTypeOrmEntity)
+    private readonly productRepository: Repository<ProductTypeOrmEntity>,
     private readonly saleMapper: SaleMapper
   ) {}
 
@@ -67,7 +83,9 @@ export class TypeOrmSaleRepository implements ISaleRepository {
       itemsBySaleId.set(item.saleId, existing)
     }
 
-    const customerIds = [...new Set(sales.map((sale) => sale.customerId).filter((id): id is string => !!id))]
+    const customerIds = [
+      ...new Set(sales.map((sale) => sale.customerId).filter((id): id is string => !!id))
+    ]
     const customers =
       customerIds.length > 0
         ? await this.customerRepository.find({
@@ -86,6 +104,59 @@ export class TypeOrmSaleRepository implements ISaleRepository {
         customerName: sale.customerId ? customerNameById.get(sale.customerId) : undefined
       })),
       total
+    }
+  }
+
+  async findById(id: string, businessId: string): Promise<SaleDetailResult | null> {
+    const saleEntity = await this.salesRepository.findOne({
+      where: {
+        id,
+        businessId
+      }
+    })
+
+    if (!saleEntity) {
+      return null
+    }
+
+    const saleItems = await this.saleItemsRepository.find({
+      where: {
+        saleId: saleEntity.id,
+        businessId
+      }
+    })
+
+    const [customer, products] = await Promise.all([
+      saleEntity.customerId
+        ? this.customerRepository.findOne({
+            where: {
+              id: saleEntity.customerId,
+              businessId
+            }
+          })
+        : Promise.resolve(null),
+      saleItems.length > 0
+        ? this.productRepository.find({
+            where: {
+              businessId,
+              id: In(saleItems.map((item) => item.productId))
+            }
+          })
+        : Promise.resolve([])
+    ])
+
+    const productNameById = new Map(products.map((product) => [product.id, product.name]))
+
+    return {
+      sale: this.saleMapper.toDomain(saleEntity, saleItems),
+      customerName: customer?.name,
+      items: saleItems.map((item) => ({
+        productId: item.productId,
+        productName: productNameById.get(item.productId),
+        quantity: item.quantity,
+        price: Number(item.unitPrice),
+        discount: Number(item.lineDiscount)
+      }))
     }
   }
 }
