@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common"
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common"
 import { CreateSaleDto } from "src/modules/sales/application/dto/create-sale.dto"
 import { ListSalesQueryDto } from "src/modules/sales/application/dto/list-sales-query.dto"
 import { CreateSaleUseCase } from "src/modules/sales/application/use-cases/create-sale.use-case"
@@ -32,7 +32,7 @@ export class SalesController {
   }
 
   @Get(":id")
-  findOne(@BusinessId() businessId: string, @Query("id") saleId: string) {
+  findOne(@BusinessId() businessId: string, @Param("id") saleId: string) {
     return this.findOneSaleUseCase.execute(businessId, saleId)
   }
 }

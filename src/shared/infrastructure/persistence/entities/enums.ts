@@ -11,7 +11,6 @@ export enum SaleType {
 
 export enum DebtStatus {
   OPEN = "OPEN",
-  PARTIAL = "PARTIAL",
   PAID = "PAID",
   CANCELLED = "CANCELLED"
 }

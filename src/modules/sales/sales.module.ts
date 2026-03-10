@@ -1,6 +1,9 @@
 import { Module } from "@nestjs/common"
 import { TypeOrmModule } from "@nestjs/typeorm"
 import { AuthModule } from "src/modules/auth/auth.module"
+import { CustomersModule } from "src/modules/customers/customers.module"
+import { DEBT_REPOSITORY } from "src/modules/debts/domain/repositories/debt.repository"
+import { TypeOrmDebtRepository } from "src/modules/debts/infrastructure/repositories/typeorm-debt.repository"
 import { InventoryModule } from "src/modules/inventory/inventory.module"
 import { CreateSaleUseCase } from "src/modules/sales/application/use-cases/create-sale.use-case"
 import { ListSalesUseCase } from "src/modules/sales/application/use-cases/list-sales.use-case"
@@ -10,6 +13,7 @@ import { SaleMapper } from "src/modules/sales/infrastructure/persistence/mappers
 import { TypeOrmSaleRepository } from "src/modules/sales/infrastructure/persistence/repositories/typeorm-sale.repository"
 import { SalesController } from "src/modules/sales/presentation/controllers/sales.controller"
 import { SaleItemTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/sale-item.typeorm-entity"
+import { DebtTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/debt.typeorm-entity"
 import { SaleTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/sale.typeorm-entity"
 import { CustomerTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/customers.typeorm-entity"
 import { ProductTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/product.typeorm-entity"
@@ -18,10 +22,12 @@ import { FindOneSaleUseCase } from "./application/use-cases/find-one-sales.use-c
 @Module({
   imports: [
     AuthModule,
+    CustomersModule,
     InventoryModule,
     TypeOrmModule.forFeature([
       SaleTypeOrmEntity,
       SaleItemTypeOrmEntity,
+      DebtTypeOrmEntity,
       CustomerTypeOrmEntity,
       ProductTypeOrmEntity
     ])
@@ -33,7 +39,9 @@ import { FindOneSaleUseCase } from "./application/use-cases/find-one-sales.use-c
     FindOneSaleUseCase,
     VoucherImgAdapter,
     SaleMapper,
+    TypeOrmDebtRepository,
     TypeOrmSaleRepository,
+    { provide: DEBT_REPOSITORY, useExisting: TypeOrmDebtRepository },
     { provide: SALE_REPOSITORY, useExisting: TypeOrmSaleRepository }
   ],
   exports: [CreateSaleUseCase, ListSalesUseCase, FindOneSaleUseCase]

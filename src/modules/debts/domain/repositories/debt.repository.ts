@@ -1,5 +1,17 @@
-export interface DebtRepository {
-  createWithManager(manager: unknown, input: Record<string, unknown>): Promise<{ id: string }>
-  addPayment(input: Record<string, unknown>): Promise<void>
-  findOpenDebts(businessId: string): Promise<Record<string, unknown>[]>
+import { EntityManager } from "typeorm"
+
+export const DEBT_REPOSITORY = Symbol("DEBT_REPOSITORY")
+
+export interface CreateDebtInput {
+  id: string
+  businessId: string
+  saleId: string
+  clientId: string
+  totalDue: number
+  balance: number
+  dueDate: string
+}
+
+export interface IDebtRepository {
+  create(debt: CreateDebtInput, manager: EntityManager): Promise<void>
 }

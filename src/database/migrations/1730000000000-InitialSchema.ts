@@ -18,7 +18,7 @@ export class InitialSchema1730000000000 implements MigrationInterface {
     )
     await queryRunner.query(`CREATE TYPE "public"."sales_type_enum" AS ENUM('CASH', 'CREDIT')`)
     await queryRunner.query(
-      `CREATE TYPE "public"."debts_status_enum" AS ENUM('OPEN', 'PARTIAL', 'PAID', 'CANCELLED')`
+      `CREATE TYPE "public"."debts_status_enum" AS ENUM('OPEN', 'PAID', 'CANCELLED')`
     )
     await queryRunner.query(
       `CREATE TABLE "businesses" ("id" uuid PRIMARY KEY DEFAULT gen_random_uuid(), "name" varchar(120) NOT NULL UNIQUE, "isActive" boolean NOT NULL DEFAULT true, "createdAt" timestamptz NOT NULL DEFAULT now(), "updatedAt" timestamptz NOT NULL DEFAULT now())`

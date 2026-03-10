@@ -53,12 +53,8 @@ export class DebtsService {
         })
       )
 
-      const totalDue = Number(debt.totalDue)
       const nextBalance = Math.max(0, Number(debt.balance) - amount)
-      const nextPaid = totalDue - nextBalance
-
-      const nextStatus =
-        nextBalance === 0 ? DebtStatus.PAID : nextPaid > 0 ? DebtStatus.PARTIAL : DebtStatus.OPEN
+      const nextStatus = nextBalance === 0 ? DebtStatus.PAID : DebtStatus.OPEN
 
       await debtRepo.update(
         { id: debt.id },
@@ -87,7 +83,7 @@ export class DebtsService {
     const debts = await debtRepo.find({
       where: {
         businessId,
-        status: In([DebtStatus.OPEN, DebtStatus.PARTIAL])
+        status: In([DebtStatus.OPEN])
       },
       order: { createdAt: "DESC" }
     })

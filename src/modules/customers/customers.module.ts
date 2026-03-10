@@ -26,7 +26,9 @@ import { CustomersController } from "./presentation/controllers/customers.contro
     CreateCustomerService,
     UpdateCustomerService,
     GetCustomersService,
-    ListCustomersSelectService
+    ListCustomersSelectService,
+    TypeOrmCustomerRepository,
+    CUSTOMER_REPOSITORY
   ]
 })
 export class CustomersModule {}
