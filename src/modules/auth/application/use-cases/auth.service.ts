@@ -109,7 +109,7 @@ export class AuthService {
 
     const normalizedPhone = input.phone?.trim()
     if (normalizedPhone && !this.otpRegex.test(normalizedPhone)) {
-      throw new BadRequestException("phone must be E.164")
+      throw new BadRequestException("Formato válido: +50500000000")
     }
 
     const normalizedEmail = input.email?.trim().toLowerCase()
