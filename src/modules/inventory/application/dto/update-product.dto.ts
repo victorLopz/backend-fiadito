@@ -21,6 +21,12 @@ export class UpdateProductDto {
 
   @IsOptional()
   @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  stockCurrent?: number
+
+  @IsOptional()
+  @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   price?: number

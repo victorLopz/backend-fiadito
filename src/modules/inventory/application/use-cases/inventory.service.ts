@@ -187,6 +187,23 @@ export class InventoryService {
       updatePayload.stockMin = dto.stockMin
     }
 
+    if (dto.stockCurrent !== undefined && dto.stockCurrent !== product.stockCurrent) {
+      const quantityDifference = dto.stockCurrent - product.stockCurrent
+      const movementType =
+        quantityDifference > 0 ? InventoryMovementType.IN : InventoryMovementType.OUT
+
+      await this.inventoryMovementRepository.create({
+        businessId,
+        productId: id,
+        type: movementType,
+        quantity: Math.abs(quantityDifference),
+        reason: `STOCK_UPDATE by system`,
+        createdBy: "system"
+      })
+
+      updatePayload.stockCurrent = dto.stockCurrent
+    }
+
     const updatedProduct = await this.productRepository.update(id, businessId, updatePayload)
     return {
       id: updatedProduct.id,
