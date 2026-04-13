@@ -15,7 +15,11 @@ export interface ProductRepository {
     createdBy: string
   }): Promise<ProductTypeOrmEntity>
   findById(id: string, businessId: string): Promise<ProductTypeOrmEntity | null>
-  update(id: string, businessId: string, input: Partial<ProductTypeOrmEntity>): Promise<void>
+  update(
+    id: string,
+    businessId: string,
+    input: Partial<ProductTypeOrmEntity>
+  ): Promise<ProductTypeOrmEntity>
   deactivate(id: string, businessId: string): Promise<boolean>
   findLowStockPaginated(input: {
     businessId: string

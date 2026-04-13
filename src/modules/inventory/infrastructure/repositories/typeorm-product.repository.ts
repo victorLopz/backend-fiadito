@@ -47,8 +47,13 @@ export class TypeOrmProductRepository implements ProductRepository {
     id: string,
     businessId: string,
     input: Partial<ProductTypeOrmEntity>
-  ): Promise<void> {
+  ): Promise<ProductTypeOrmEntity> {
     await this.repository.update({ id, businessId }, input)
+    const updated = await this.repository.findOne({ where: { id, businessId } })
+    if (!updated) {
+      throw new Error("Product not found after update")
+    }
+    return updated
   }
 
   async deactivate(id: string, businessId: string): Promise<boolean> {

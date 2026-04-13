@@ -23,6 +23,22 @@ export interface SaleInventoryProductSnapshot {
   stockCurrent: number
 }
 
+export interface InventoryProductSnapshot {
+  id: string
+  businessId: string
+  sku: string
+  name: string
+  barcode?: string
+  price: number
+  cost: number
+  stockCurrent: number
+  stockMin: number
+  isActive: boolean
+  createdBy: string
+  createdAt: Date
+  updatedAt: Date
+}
+
 @Injectable()
 export class InventoryService {
   constructor(
@@ -36,7 +52,7 @@ export class InventoryService {
     dto: CreateProductDto,
     businessId: string,
     userId: string
-  ): Promise<Record<string, unknown>> {
+  ): Promise<InventoryProductSnapshot> {
     if (!businessId) {
       throw new BadRequestException("businessId is required")
     }
@@ -136,7 +152,11 @@ export class InventoryService {
     }
   }
 
-  async updateProduct(id: string, dto: UpdateProductDto, businessId: string): Promise<void> {
+  async updateProduct(
+    id: string,
+    dto: UpdateProductDto,
+    businessId: string
+  ): Promise<InventoryProductSnapshot> {
     if (!businessId) {
       throw new BadRequestException("businessId is required")
     }
@@ -167,7 +187,22 @@ export class InventoryService {
       updatePayload.stockMin = dto.stockMin
     }
 
-    await this.productRepository.update(id, businessId, updatePayload)
+    const updatedProduct = await this.productRepository.update(id, businessId, updatePayload)
+    return {
+      id: updatedProduct.id,
+      businessId: updatedProduct.businessId,
+      sku: updatedProduct.sku,
+      name: updatedProduct.name,
+      barcode: updatedProduct.barcode,
+      price: Number(updatedProduct.price),
+      cost: Number(updatedProduct.cost),
+      stockCurrent: updatedProduct.stockCurrent,
+      stockMin: updatedProduct.stockMin,
+      isActive: updatedProduct.isActive,
+      createdBy: updatedProduct.createdBy,
+      createdAt: updatedProduct.createdAt,
+      updatedAt: updatedProduct.updatedAt
+    }
   }
 
   async deactivateProduct(productId: string, businessId: string): Promise<void> {
@@ -275,7 +310,9 @@ export class InventoryService {
   ): Promise<void> {
     for (const [productId, quantity] of requiredByProduct.entries()) {
       const productRepo = manager.getRepository(ProductTypeOrmEntity)
-      const product = await productRepo.findOne({ where: { id: productId, businessId, isActive: true } })
+      const product = await productRepo.findOne({
+        where: { id: productId, businessId, isActive: true }
+      })
       if (!product) {
         throw new NotFoundException(`Product ${productId} not found or inactive`)
       }
