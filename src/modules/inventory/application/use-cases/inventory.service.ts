@@ -198,7 +198,7 @@ export class InventoryService {
         type: movementType,
         quantity: Math.abs(quantityDifference),
         reason: `STOCK_UPDATE by system`,
-        createdBy: "system"
+        createdBy: null
       })
 
       updatePayload.stockCurrent = dto.stockCurrent

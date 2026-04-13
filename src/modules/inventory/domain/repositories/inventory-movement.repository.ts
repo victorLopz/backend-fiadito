@@ -9,6 +9,6 @@ export interface InventoryMovementRepository {
     type: InventoryMovementType
     quantity: number
     reason?: string
-    createdBy: string
+    createdBy: string | null
   }): Promise<void>
 }
