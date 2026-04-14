@@ -74,19 +74,30 @@ export class DebtsService {
     }
   }
 
-  async listOpenDebts(filters: Record<string, unknown>): Promise<Record<string, unknown>[]> {
+  async listOpenDebts(filters: Record<string, unknown>): Promise<{
+    data: Record<string, unknown>[]
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  }> {
     const businessId = typeof filters.businessId === "string" ? filters.businessId : ""
     if (!businessId) {
       throw new BadRequestException("businessId is required")
     }
 
+    const page = this.parsePositiveInt(filters.page, 1)
+    const limit = this.parsePositiveInt(filters.limit, 20)
+
     const debtRepo = this.dataSource.getRepository(DebtTypeOrmEntity)
-    const debts = await debtRepo.find({
+    const [debts, total] = await debtRepo.findAndCount({
       where: {
         businessId,
         status: In([DebtStatus.OPEN])
       },
-      order: { createdAt: "DESC" }
+      order: { createdAt: "DESC" },
+      skip: (page - 1) * limit,
+      take: limit
     })
 
     const saleIds = [...new Set(debts.map((debt) => debt.saleId))]
@@ -123,23 +134,29 @@ export class DebtsService {
       businesses.map((business) => [business.id, business.legalName])
     )
 
-    return debts.map((debt) => ({
-      id: debt.id,
-      debtReference: `DEBT-${debt.id.slice(0, 8)}`,
-      businessId: debt.businessId,
-      businessName: businessNameById.get(debt.businessId) ?? "Negocio sin nombre",
-      saleId: debt.saleId,
-      saleReference: saleReferenceById.get(debt.saleId) ?? `SALE-${debt.saleId.slice(0, 8)}`,
-      clientId: debt.clientId,
-      clientName: customerNameById.get(debt.clientId) ?? "Cliente sin nombre",
-      totalDue: Number(debt.totalDue),
-      paidAmount: Number(debt.totalDue) - Number(debt.balance),
-      balance: Number(debt.balance),
-      status: debt.status,
-      dueDate: debt.dueDate,
-      createdAt: debt.createdAt,
-      updatedAt: debt.updatedAt
-    }))
+    return {
+      data: debts.map((debt) => ({
+        id: debt.id,
+        debtReference: `DEBT-${debt.id.slice(0, 8)}`,
+        businessId: debt.businessId,
+        businessName: businessNameById.get(debt.businessId) ?? "Negocio sin nombre",
+        saleId: debt.saleId,
+        saleReference: saleReferenceById.get(debt.saleId) ?? `SALE-${debt.saleId.slice(0, 8)}`,
+        clientId: debt.clientId,
+        clientName: customerNameById.get(debt.clientId) ?? "Cliente sin nombre",
+        totalDue: Number(debt.totalDue),
+        paidAmount: Number(debt.totalDue) - Number(debt.balance),
+        balance: Number(debt.balance),
+        status: debt.status,
+        dueDate: debt.dueDate,
+        createdAt: debt.createdAt,
+        updatedAt: debt.updatedAt
+      })),
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit)
+    }
   }
 
   async sendDebtReminder(debtId: string, createdBy?: string): Promise<void> {
@@ -174,5 +191,20 @@ export class DebtsService {
 
   private toMoney(value: number): string {
     return value.toFixed(2)
+  }
+
+  private parsePositiveInt(value: unknown, fallback: number): number {
+    if (typeof value === "number" && Number.isInteger(value) && value > 0) {
+      return value
+    }
+
+    if (typeof value === "string") {
+      const parsed = Number.parseInt(value, 10)
+      if (Number.isInteger(parsed) && parsed > 0) {
+        return parsed
+      }
+    }
+
+    return fallback
   }
 }
