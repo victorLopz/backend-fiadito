@@ -22,7 +22,7 @@ export class DebtsController {
   }
 
   @Post(":id/reminders/whatsapp")
-  sendReminder(@Param("id") debtId: string) {
-    return this.debtsService.sendDebtReminder(debtId)
+  sendReminder(@Param("id") debtId: string, @CurrentUser() user: AuthUser) {
+    return this.debtsService.sendDebtReminder(debtId, user?.id)
   }
 }

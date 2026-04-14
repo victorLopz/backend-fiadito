@@ -1,11 +1,12 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common"
 import { DataSource, In } from "typeorm"
-import { ClientTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/client.typeorm-entity"
+import { BusinessTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/business.typeorm-entity"
+import { CustomerTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/customers.typeorm-entity"
 import { DebtPaymentTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/debt-payment.typeorm-entity"
 import { DebtTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/debt.typeorm-entity"
 import { SaleTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/sale.typeorm-entity"
 import { WhatsappMessageLogTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/whatsapp-message-log.typeorm-entity"
-import { DebtStatus } from "src/shared/infrastructure/persistence/entities/enums"
+import { DebtStatus, WhatsappMessageType } from "src/shared/infrastructure/persistence/entities/enums"
 
 @Injectable()
 export class DebtsService {
@@ -49,7 +50,7 @@ export class DebtsService {
           businessId: debt.businessId,
           debtId: debt.id,
           amount: this.toMoney(amount),
-          userId: paymentUserId
+          receivedBy: paymentUserId
         })
       )
 
@@ -88,11 +89,49 @@ export class DebtsService {
       order: { createdAt: "DESC" }
     })
 
+    const saleIds = [...new Set(debts.map((debt) => debt.saleId))]
+    const clientIds = [...new Set(debts.map((debt) => debt.clientId))]
+    const businessIds = [...new Set(debts.map((debt) => debt.businessId))]
+
+    const saleRepo = this.dataSource.getRepository(SaleTypeOrmEntity)
+    const customerRepo = this.dataSource.getRepository(CustomerTypeOrmEntity)
+    const businessRepo = this.dataSource.getRepository(BusinessTypeOrmEntity)
+
+    const [sales, customers, businesses] = await Promise.all([
+      saleIds.length > 0
+        ? saleRepo.find({
+            where: { businessId, id: In(saleIds) }
+          })
+        : [],
+      clientIds.length > 0
+        ? customerRepo.find({
+            where: { businessId, id: In(clientIds) }
+          })
+        : [],
+      businessIds.length > 0
+        ? businessRepo.find({
+            where: { id: In(businessIds) }
+          })
+        : []
+    ])
+
+    const saleReferenceById = new Map(
+      sales.map((sale) => [sale.id, sale.receiptNumber ?? `SALE-${sale.id.slice(0, 8)}`])
+    )
+    const customerNameById = new Map(customers.map((customer) => [customer.id, customer.name]))
+    const businessNameById = new Map(
+      businesses.map((business) => [business.id, business.legalName])
+    )
+
     return debts.map((debt) => ({
       id: debt.id,
+      debtReference: `DEBT-${debt.id.slice(0, 8)}`,
       businessId: debt.businessId,
+      businessName: businessNameById.get(debt.businessId) ?? "Negocio sin nombre",
       saleId: debt.saleId,
+      saleReference: saleReferenceById.get(debt.saleId) ?? `SALE-${debt.saleId.slice(0, 8)}`,
       clientId: debt.clientId,
+      clientName: customerNameById.get(debt.clientId) ?? "Cliente sin nombre",
       totalDue: Number(debt.totalDue),
       paidAmount: Number(debt.totalDue) - Number(debt.balance),
       balance: Number(debt.balance),
@@ -103,9 +142,9 @@ export class DebtsService {
     }))
   }
 
-  async sendDebtReminder(debtId: string): Promise<void> {
+  async sendDebtReminder(debtId: string, createdBy?: string): Promise<void> {
     const debtRepo = this.dataSource.getRepository(DebtTypeOrmEntity)
-    const clientRepo = this.dataSource.getRepository(ClientTypeOrmEntity)
+    const customerRepo = this.dataSource.getRepository(CustomerTypeOrmEntity)
     const logRepo = this.dataSource.getRepository(WhatsappMessageLogTypeOrmEntity)
 
     const debt = await debtRepo.findOne({ where: { id: debtId } })
@@ -113,21 +152,22 @@ export class DebtsService {
       throw new NotFoundException("Debt not found")
     }
 
-    const client = await clientRepo.findOne({
+    const customer = await customerRepo.findOne({
       where: { id: debt.clientId, businessId: debt.businessId }
     })
+    const clientName = customer?.name ?? "Cliente sin nombre"
 
     await logRepo.save(
       logRepo.create({
         businessId: debt.businessId,
-        destination: client?.phone ?? "UNKNOWN",
-        templateCode: "DEBT_REMINDER",
-        status: "PENDING",
-        payload: {
-          debtId: debt.id,
-          clientId: debt.clientId,
-          balance: Number(debt.balance)
-        }
+        type: WhatsappMessageType.DEBT_REMINDER,
+        clientId: debt.clientId,
+        saleId: debt.saleId,
+        debtId: debt.id,
+        toPhoneE164: customer?.whatsappE164 ?? "UNKNOWN",
+        messageText: `Hola ${clientName}, te recordamos que tienes un saldo pendiente de ${Number(debt.balance).toFixed(2)}. Referencia: DEBT-${debt.id.slice(0, 8)}.`,
+        status: "CREATED",
+        createdBy: createdBy ?? null
       })
     )
   }
