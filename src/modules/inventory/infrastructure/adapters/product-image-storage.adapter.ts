@@ -49,16 +49,15 @@ export class ProductImageStorageAdapter {
     const secureRaw = (this.configService.get<string>("FTP_SECURE") ?? "").trim().toLowerCase()
     this.protocol = secureRaw === "sftp" ? "sftp" : "ftp"
     this.secure = secureRaw === "true" || secureRaw === "1"
-    this.port = Number(this.configService.get<string>("FTP_PORT")) || (this.protocol === "sftp" ? 22 : 21)
+    this.port =
+      Number(this.configService.get<string>("FTP_PORT")) || (this.protocol === "sftp" ? 22 : 21)
   }
 
   async uploadProductImage(input: UploadProductImageInput): Promise<UploadProductImageResult> {
     this.assertConfig()
 
-    const relativePath = `products/${input.fileName}`
-    const remotePath = this.remoteBaseDir
-      ? `${this.remoteBaseDir}/${relativePath}`
-      : relativePath
+    const relativePath = `productos/${input.fileName}`
+    const remotePath = this.remoteBaseDir ? `${this.remoteBaseDir}/${relativePath}` : relativePath
 
     if (this.protocol === "sftp") {
       await this.uploadWithSftp(remotePath, input.fileBuffer)
@@ -111,6 +110,12 @@ export class ProductImageStorageAdapter {
   private assertConfig(): void {
     if (!this.host || !this.user || !this.password || !this.publicBaseUrl) {
       throw new InternalServerErrorException("FTP configuration is incomplete")
+    }
+
+    if (!this.remoteBaseDir) {
+      throw new InternalServerErrorException(
+        "FTP_REMOTE_BASE_DIR is required and must map to a public web directory"
+      )
     }
   }
 
