@@ -22,6 +22,11 @@ export class DebtsController {
     return this.debtsService.listOpenDebts({ ...query, businessId })
   }
 
+  @Get(":id")
+  findOne(@Param("id") debtId: string, @BusinessId() businessId: string) {
+    return this.debtsService.getDebtDetail(debtId, businessId)
+  }
+
   @Post(":id/reminders/whatsapp")
   sendReminder(@Param("id") debtId: string, @CurrentUser() user: AuthUser) {
     return this.debtsService.sendDebtReminder(debtId, user?.id)

@@ -159,6 +159,114 @@ export class DebtsService {
     }
   }
 
+  async getDebtDetail(
+    debtId: string,
+    businessId: string
+  ): Promise<{
+    id: string
+    debtReference: string
+    businessId: string
+    businessName: string
+    saleId: string
+    saleReference: string
+    clientId: string
+    clientName: string
+    totalDue: number
+    paidAmount: number
+    balance: number
+    status: DebtStatus
+    dueDate: string
+    createdAt: Date
+    updatedAt: Date
+    payments: Array<{
+      id: string
+      amount: number
+      paidAt: Date
+      createdAt: Date
+      receivedBy: string | null
+    }>
+  }> {
+    if (!debtId) {
+      throw new BadRequestException("debtId is required")
+    }
+
+    if (!businessId) {
+      throw new BadRequestException("businessId is required")
+    }
+
+    const debtRepo = this.dataSource.getRepository(DebtTypeOrmEntity)
+    const paymentRepo = this.dataSource.getRepository(DebtPaymentTypeOrmEntity)
+    const saleRepo = this.dataSource.getRepository(SaleTypeOrmEntity)
+    const customerRepo = this.dataSource.getRepository(CustomerTypeOrmEntity)
+    const businessRepo = this.dataSource.getRepository(BusinessTypeOrmEntity)
+
+    const debt = await debtRepo.findOne({
+      where: {
+        id: debtId,
+        businessId
+      }
+    })
+
+    if (!debt) {
+      throw new NotFoundException("Debt not found")
+    }
+
+    const [payments, sale, customer, business] = await Promise.all([
+      paymentRepo.find({
+        where: {
+          debtId: debt.id,
+          businessId
+        },
+        order: {
+          paidAt: "DESC",
+          createdAt: "DESC"
+        }
+      }),
+      saleRepo.findOne({
+        where: {
+          id: debt.saleId,
+          businessId
+        }
+      }),
+      customerRepo.findOne({
+        where: {
+          id: debt.clientId,
+          businessId
+        }
+      }),
+      businessRepo.findOne({
+        where: {
+          id: debt.businessId
+        }
+      })
+    ])
+
+    return {
+      id: debt.id,
+      debtReference: `DEBT-${debt.id.slice(0, 8)}`,
+      businessId: debt.businessId,
+      businessName: business?.legalName ?? "Negocio sin nombre",
+      saleId: debt.saleId,
+      saleReference: sale?.receiptNumber ?? `SALE-${debt.saleId.slice(0, 8)}`,
+      clientId: debt.clientId,
+      clientName: customer?.name ?? "Cliente sin nombre",
+      totalDue: Number(debt.totalDue),
+      paidAmount: Number(debt.totalDue) - Number(debt.balance),
+      balance: Number(debt.balance),
+      status: debt.status,
+      dueDate: debt.dueDate,
+      createdAt: debt.createdAt,
+      updatedAt: debt.updatedAt,
+      payments: payments.map((payment) => ({
+        id: payment.id,
+        amount: Number(payment.amount),
+        paidAt: payment.paidAt,
+        createdAt: payment.createdAt,
+        receivedBy: payment.receivedBy
+      }))
+    }
+  }
+
   async sendDebtReminder(debtId: string, createdBy?: string): Promise<void> {
     const debtRepo = this.dataSource.getRepository(DebtTypeOrmEntity)
     const customerRepo = this.dataSource.getRepository(CustomerTypeOrmEntity)
