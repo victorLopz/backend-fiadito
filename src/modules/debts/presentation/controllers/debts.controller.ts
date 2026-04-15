@@ -11,10 +11,10 @@ export class DebtsController {
   @Post(":id/payments")
   addPayment(
     @Param("id") debtId: string,
-    @Body() body: { amount: number; userId?: string },
+    @Body() body: { amount: number; userId?: string; note?: string },
     @CurrentUser() user: AuthUser
   ) {
-    return this.debtsService.addPayment(debtId, body.amount, body.userId ?? user?.id)
+    return this.debtsService.addPayment(debtId, body.amount, body.userId ?? user?.id, body.note)
   }
 
   @Get("open")

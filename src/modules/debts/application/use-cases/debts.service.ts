@@ -6,13 +6,16 @@ import { DebtPaymentTypeOrmEntity } from "src/shared/infrastructure/persistence/
 import { DebtTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/debt.typeorm-entity"
 import { SaleTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/sale.typeorm-entity"
 import { WhatsappMessageLogTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/whatsapp-message-log.typeorm-entity"
-import { DebtStatus, WhatsappMessageType } from "src/shared/infrastructure/persistence/entities/enums"
+import {
+  DebtStatus,
+  WhatsappMessageType
+} from "src/shared/infrastructure/persistence/entities/enums"
 
 @Injectable()
 export class DebtsService {
   constructor(private readonly dataSource: DataSource) {}
 
-  async addPayment(debtId: string, amount: number, userId?: string): Promise<void> {
+  async addPayment(debtId: string, amount: number, userId?: string, note?: string): Promise<void> {
     if (!debtId) {
       throw new BadRequestException("debtId is required")
     }
@@ -50,7 +53,8 @@ export class DebtsService {
           businessId: debt.businessId,
           debtId: debt.id,
           amount: this.toMoney(amount),
-          receivedBy: paymentUserId
+          receivedBy: paymentUserId,
+          note: note ?? null
         })
       )
 
@@ -184,6 +188,7 @@ export class DebtsService {
       paidAt: Date
       createdAt: Date
       receivedBy: string | null
+      notes: string | null
     }>
   }> {
     if (!debtId) {
@@ -262,7 +267,8 @@ export class DebtsService {
         amount: Number(payment.amount),
         paidAt: payment.paidAt,
         createdAt: payment.createdAt,
-        receivedBy: payment.receivedBy
+        receivedBy: payment.receivedBy,
+        notes: payment.note
       }))
     }
   }
