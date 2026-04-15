@@ -169,6 +169,19 @@ export class InventoryService {
       maxCost: query.maxCost
     })
 
+    const productIds = items.map((row) => row.id)
+    const productImages = await this.productImageRepository.findByProductIds(businessId, productIds)
+    const imagesByProductId = new Map<string, Array<{ id: string; url: string }>>()
+
+    for (const image of productImages) {
+      const images = imagesByProductId.get(image.productId) ?? []
+      images.push({
+        id: image.id,
+        url: image.imageUrl
+      })
+      imagesByProductId.set(image.productId, images)
+    }
+
     const data = items.map((row) => ({
       id: row.id,
       businessId: row.businessId,
@@ -181,6 +194,7 @@ export class InventoryService {
       stockMin: row.stockMin,
       isActive: row.isActive,
       createdBy: row.createdBy,
+      images: imagesByProductId.get(row.id) ?? [],
       createdAt: row.createdAt,
       updatedAt: row.updatedAt
     }))

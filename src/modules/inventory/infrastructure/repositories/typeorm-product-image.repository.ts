@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
 import { ProductImageRepository } from "src/modules/inventory/domain/repositories/product-image.repository"
 import { ProductImageTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/product-image.typeorm-entity"
-import { Repository } from "typeorm"
+import { In, Repository } from "typeorm"
 
 @Injectable()
 export class TypeOrmProductImageRepository implements ProductImageRepository {
@@ -23,6 +23,20 @@ export class TypeOrmProductImageRepository implements ProductImageRepository {
         imageUrl: input.imageUrl
       })
     )
+  }
+
+  async findByProductIds(
+    businessId: string,
+    productIds: string[]
+  ): Promise<ProductImageTypeOrmEntity[]> {
+    if (productIds.length === 0) {
+      return []
+    }
+
+    return this.repository.find({
+      where: { businessId, productId: In(productIds) },
+      order: { createdAt: "ASC" }
+    })
   }
 
   async deleteByIds(ids: string[]): Promise<void> {

@@ -8,5 +8,9 @@ export interface ProductImageRepository {
     productId: string
     imageUrl: string
   }): Promise<ProductImageTypeOrmEntity>
+  findByProductIds(
+    businessId: string,
+    productIds: string[]
+  ): Promise<ProductImageTypeOrmEntity[]>
   deleteByIds(ids: string[]): Promise<void>
 }
