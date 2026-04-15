@@ -12,6 +12,7 @@ import {
   Between,
   EntityManager,
   FindOptionsWhere,
+  ILike,
   In,
   LessThanOrEqual,
   MoreThanOrEqual,
@@ -61,6 +62,25 @@ export class TypeOrmSaleRepository implements ISaleRepository {
 
     if (filters.type) {
       where.type = filters.type as SaleType
+    }
+
+    if (filters.customerName?.trim()) {
+      const matchingCustomers = await this.customerRepository.find({
+        where: {
+          businessId: filters.businessId,
+          name: ILike(`%${filters.customerName.trim()}%`)
+        },
+        select: {
+          id: true
+        }
+      })
+
+      const customerIds = matchingCustomers.map((customer) => customer.id)
+      if (customerIds.length === 0) {
+        return { items: [], total: 0 }
+      }
+
+      where.customerId = In(customerIds)
     }
 
     const [sales, total] = await this.salesRepository.findAndCount({

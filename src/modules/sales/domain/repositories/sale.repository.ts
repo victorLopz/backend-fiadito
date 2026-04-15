@@ -8,6 +8,7 @@ export interface SaleHistoryFilters {
   from?: Date
   to?: Date
   type?: string
+  customerName?: string
   page: number
   limit: number
 }

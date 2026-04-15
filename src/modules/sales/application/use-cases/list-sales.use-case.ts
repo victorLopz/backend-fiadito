@@ -20,6 +20,7 @@ export class ListSalesUseCase {
     const to = query.to ? new Date(query.to) : undefined
 
     const type = query.type ? query.type : undefined
+    const customerName = query.customerName?.trim() ? query.customerName.trim() : undefined
 
     if (to) {
       to.setHours(23, 59, 59, 999)
@@ -30,6 +31,7 @@ export class ListSalesUseCase {
       from,
       to,
       type,
+      customerName,
       page,
       limit
     })
