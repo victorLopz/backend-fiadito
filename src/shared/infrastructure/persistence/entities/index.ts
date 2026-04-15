@@ -10,6 +10,7 @@ import { InventoryMovementTypeOrmEntity } from "./inventory-movement.typeorm-ent
 import { OtpCodeTypeOrmEntity } from "./otp-code.typeorm-entity"
 import { PlanTypeOrmEntity } from "./plan.typeorm-entity"
 import { ProductTypeOrmEntity } from "./product.typeorm-entity"
+import { ProductImageTypeOrmEntity } from "./product-image.typeorm-entity"
 import { SaleItemTypeOrmEntity } from "./sale-item.typeorm-entity"
 import { SaleTypeOrmEntity } from "./sale.typeorm-entity"
 import { TrialTypeOrmEntity } from "./trial.typeorm-entity"
@@ -27,6 +28,7 @@ export const TYPEORM_ENTITIES = [
   PlanTypeOrmEntity,
   BusinessSubscriptionTypeOrmEntity,
   ProductTypeOrmEntity,
+  ProductImageTypeOrmEntity,
   InventoryMovementTypeOrmEntity,
   ClientTypeOrmEntity,
   CustomerTypeOrmEntity,

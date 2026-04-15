@@ -74,6 +74,9 @@ export class InitialSchema1730000000000 implements MigrationInterface {
     await queryRunner.query(
       `CREATE TABLE "trials" ("id" uuid PRIMARY KEY DEFAULT gen_random_uuid(), "businessId" uuid NOT NULL, "startsAt" date NOT NULL, "endsAt" date NOT NULL, "convertedToPaid" boolean NOT NULL DEFAULT false, "createdAt" timestamptz NOT NULL DEFAULT now())`
     )
+    await queryRunner.query(
+      `CREATE TABLE "products_img" ("id" uuid PRIMARY KEY DEFAULT gen_random_uuid(), "businessId" uuid NOT NULL, "productId" uuid NOT NULL, "imageUrl" varchar NOT NULL, "createdAt" timestamptz NOT NULL DEFAULT now())`
+    )
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

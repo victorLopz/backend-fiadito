@@ -1,12 +1,24 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common"
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException
+} from "@nestjs/common"
+import { ConfigService } from "@nestjs/config"
 import { CreateProductDto } from "../dto/create-product.dto"
 import { ListLowStockQueryDto } from "../dto/list-low-stock-query.dto"
 import { ListProductsQueryDto } from "../dto/list-products-query.dto"
 import { UpdateProductDto } from "../dto/update-product.dto"
+import { ProductImageStorageAdapter } from "src/modules/inventory/infrastructure/adapters/product-image-storage.adapter"
 import {
   INVENTORY_MOVEMENT_REPOSITORY,
   InventoryMovementRepository
 } from "src/modules/inventory/domain/repositories/inventory-movement.repository"
+import {
+  PRODUCT_IMAGE_REPOSITORY,
+  ProductImageRepository
+} from "src/modules/inventory/domain/repositories/product-image.repository"
 import {
   PRODUCT_REPOSITORY,
   ProductRepository
@@ -39,14 +51,44 @@ export interface InventoryProductSnapshot {
   updatedAt: Date
 }
 
+export interface UploadedImageFile {
+  buffer: Buffer
+  mimetype: string
+  originalname: string
+  size: number
+}
+
+export interface ProductImageSnapshot {
+  id: string
+  businessId: string
+  productId: string
+  imageUrl: string
+  createdAt: Date
+}
+
 @Injectable()
 export class InventoryService {
+  private readonly allowedMimeTypes = new Map<string, string>([
+    ["image/jpeg", "jpg"],
+    ["image/png", "png"],
+    ["image/webp", "webp"]
+  ])
+  private readonly maxFileSizeBytes: number
+  private readonly maxFilesPerUpload = 3
+
   constructor(
     @Inject(PRODUCT_REPOSITORY)
     private readonly productRepository: ProductRepository,
+    @Inject(PRODUCT_IMAGE_REPOSITORY)
+    private readonly productImageRepository: ProductImageRepository,
     @Inject(INVENTORY_MOVEMENT_REPOSITORY)
-    private readonly inventoryMovementRepository: InventoryMovementRepository
-  ) {}
+    private readonly inventoryMovementRepository: InventoryMovementRepository,
+    private readonly productImageStorageAdapter: ProductImageStorageAdapter,
+    private readonly configService: ConfigService
+  ) {
+    const maxMb = Number(this.configService.get<string>("PRODUCT_IMAGE_MAX_SIZE_MB") ?? 5)
+    this.maxFileSizeBytes = Number.isFinite(maxMb) && maxMb > 0 ? maxMb * 1024 * 1024 : 5242880
+  }
 
   async createProduct(
     dto: CreateProductDto,
@@ -272,6 +314,76 @@ export class InventoryService {
     }
   }
 
+  async uploadProductImages(
+    productId: string,
+    businessId: string,
+    files?: UploadedImageFile[]
+  ): Promise<ProductImageSnapshot[]> {
+    if (!productId || !businessId) {
+      throw new BadRequestException("productId and businessId are required")
+    }
+
+    if (!files || files.length === 0) {
+      throw new BadRequestException("at least one image file is required")
+    }
+
+    if (files.length > this.maxFilesPerUpload) {
+      throw new BadRequestException(`maximum ${this.maxFilesPerUpload} images are allowed`)
+    }
+
+    const product = await this.productRepository.findById(productId, businessId)
+    if (!product) {
+      throw new NotFoundException("Product not found")
+    }
+
+    const uploadedRemotePaths: string[] = []
+    const createdImageIds: string[] = []
+    const createdImages: ProductImageSnapshot[] = []
+
+    try {
+      for (const file of files) {
+        this.validateUploadedImageFile(file)
+
+        const extension = this.allowedMimeTypes.get(file.mimetype)
+        const fileName = `${crypto.randomUUID()}.${extension}`
+        const upload = await this.productImageStorageAdapter.uploadProductImage({
+          businessId,
+          productId,
+          fileName,
+          fileBuffer: file.buffer
+        })
+        uploadedRemotePaths.push(upload.remotePath)
+
+        const saved = await this.productImageRepository.create({
+          businessId,
+          productId,
+          imageUrl: upload.imageUrl
+        })
+        createdImageIds.push(saved.id)
+
+        createdImages.push({
+          id: saved.id,
+          businessId: saved.businessId,
+          productId: saved.productId,
+          imageUrl: saved.imageUrl,
+          createdAt: saved.createdAt
+        })
+      }
+
+      return createdImages
+    } catch (error) {
+      await Promise.all(
+        uploadedRemotePaths.map((remotePath) =>
+          this.productImageStorageAdapter.deleteFile(remotePath)
+        )
+      )
+      await this.productImageRepository.deleteByIds(createdImageIds)
+      throw new InternalServerErrorException("uploaded file rollback executed after DB error", {
+        cause: error
+      })
+    }
+  }
+
   async getProductsSnapshotForSale(
     businessId: string,
     productIds: string[],
@@ -355,5 +467,25 @@ export class InventoryService {
 
   private toMoney(amount: number): string {
     return amount.toFixed(2)
+  }
+
+  private validateUploadedImageFile(file?: UploadedImageFile): void {
+    if (!file) {
+      throw new BadRequestException("image file is required")
+    }
+
+    if (!file.buffer || file.size <= 0) {
+      throw new BadRequestException("image file is empty")
+    }
+
+    if (file.size > this.maxFileSizeBytes) {
+      throw new BadRequestException(
+        `image file exceeds maximum size of ${this.maxFileSizeBytes} bytes`
+      )
+    }
+
+    if (!this.allowedMimeTypes.has(file.mimetype)) {
+      throw new BadRequestException("only .jpg, .jpeg, .png and .webp are allowed")
+    }
   }
 }
