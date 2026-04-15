@@ -1,6 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common"
 import { ListSalesQueryDto } from "src/modules/sales/application/dto/list-sales-query.dto"
-import { ISaleRepository, SALE_REPOSITORY } from "src/modules/sales/domain/repositories/sale.repository"
+import {
+  ISaleRepository,
+  SALE_REPOSITORY
+} from "src/modules/sales/domain/repositories/sale.repository"
 
 @Injectable()
 export class ListSalesUseCase {
@@ -16,6 +19,8 @@ export class ListSalesUseCase {
     const from = query.from ? new Date(query.from) : undefined
     const to = query.to ? new Date(query.to) : undefined
 
+    const type = query.type ? query.type : undefined
+
     if (to) {
       to.setHours(23, 59, 59, 999)
     }
@@ -24,6 +29,7 @@ export class ListSalesUseCase {
       businessId,
       from,
       to,
+      type,
       page,
       limit
     })

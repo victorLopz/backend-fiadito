@@ -16,6 +16,9 @@ export class ListSalesQueryDto {
   limit?: number
 
   @IsOptional()
+  type?: string
+
+  @IsOptional()
   @IsDateString()
   from?: string
 

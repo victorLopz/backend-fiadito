@@ -21,6 +21,7 @@ import { SaleItemTypeOrmEntity } from "src/shared/infrastructure/persistence/ent
 import { SaleTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/sale.typeorm-entity"
 import { CustomerTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/customers.typeorm-entity"
 import { ProductTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/product.typeorm-entity"
+import { SaleType } from "src/shared/infrastructure/persistence/entities/enums"
 
 @Injectable()
 export class TypeOrmSaleRepository implements ISaleRepository {
@@ -56,6 +57,10 @@ export class TypeOrmSaleRepository implements ISaleRepository {
       where.createdAt = MoreThanOrEqual(filters.from)
     } else if (filters.to) {
       where.createdAt = LessThanOrEqual(filters.to)
+    }
+
+    if (filters.type) {
+      where.type = filters.type as SaleType
     }
 
     const [sales, total] = await this.salesRepository.findAndCount({
