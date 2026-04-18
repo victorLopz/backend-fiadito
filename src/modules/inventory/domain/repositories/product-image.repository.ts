@@ -8,6 +8,13 @@ export interface ProductImageRepository {
     productId: string
     imageUrl: string
   }): Promise<ProductImageTypeOrmEntity>
+  createMany(
+    input: Array<{
+      businessId: string
+      productId: string
+      imageUrl: string
+    }>
+  ): Promise<ProductImageTypeOrmEntity[]>
   findByProductIds(
     businessId: string,
     productIds: string[]

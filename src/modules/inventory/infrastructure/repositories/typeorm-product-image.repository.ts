@@ -25,6 +25,28 @@ export class TypeOrmProductImageRepository implements ProductImageRepository {
     )
   }
 
+  async createMany(
+    input: Array<{
+      businessId: string
+      productId: string
+      imageUrl: string
+    }>
+  ): Promise<ProductImageTypeOrmEntity[]> {
+    if (input.length === 0) {
+      return []
+    }
+
+    return this.repository.save(
+      input.map((item) =>
+        this.repository.create({
+          businessId: item.businessId,
+          productId: item.productId,
+          imageUrl: item.imageUrl
+        })
+      )
+    )
+  }
+
   async findByProductIds(
     businessId: string,
     productIds: string[]

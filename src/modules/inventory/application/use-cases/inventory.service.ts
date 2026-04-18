@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpException,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -350,41 +351,42 @@ export class InventoryService {
       throw new NotFoundException("Product not found")
     }
 
+    const uploadsInput = files.map((file) => {
+      this.validateUploadedImageFile(file)
+      const extension = this.allowedMimeTypes.get(file.mimetype)
+      return {
+        fileName: `${crypto.randomUUID()}.${extension}`,
+        fileBuffer: file.buffer
+      }
+    })
+
     const uploadedRemotePaths: string[] = []
     const createdImageIds: string[] = []
-    const createdImages: ProductImageSnapshot[] = []
 
     try {
-      for (const file of files) {
-        this.validateUploadedImageFile(file)
+      const uploads = await this.productImageStorageAdapter.uploadProductImages({
+        businessId,
+        productId,
+        files: uploadsInput
+      })
+      uploadedRemotePaths.push(...uploads.map((upload) => upload.remotePath))
 
-        const extension = this.allowedMimeTypes.get(file.mimetype)
-        const fileName = `${crypto.randomUUID()}.${extension}`
-        const upload = await this.productImageStorageAdapter.uploadProductImage({
-          businessId,
-          productId,
-          fileName,
-          fileBuffer: file.buffer
-        })
-        uploadedRemotePaths.push(upload.remotePath)
-
-        const saved = await this.productImageRepository.create({
+      const created = await this.productImageRepository.createMany(
+        uploads.map((upload) => ({
           businessId,
           productId,
           imageUrl: upload.imageUrl
-        })
-        createdImageIds.push(saved.id)
+        }))
+      )
+      createdImageIds.push(...created.map((image) => image.id))
 
-        createdImages.push({
-          id: saved.id,
-          businessId: saved.businessId,
-          productId: saved.productId,
-          imageUrl: saved.imageUrl,
-          createdAt: saved.createdAt
-        })
-      }
-
-      return createdImages
+      return created.map((saved) => ({
+        id: saved.id,
+        businessId: saved.businessId,
+        productId: saved.productId,
+        imageUrl: saved.imageUrl,
+        createdAt: saved.createdAt
+      }))
     } catch (error) {
       await Promise.all(
         uploadedRemotePaths.map((remotePath) =>
@@ -392,6 +394,9 @@ export class InventoryService {
         )
       )
       await this.productImageRepository.deleteByIds(createdImageIds)
+      if (error instanceof HttpException) {
+        throw error
+      }
       throw new InternalServerErrorException("uploaded file rollback executed after DB error", {
         cause: error
       })

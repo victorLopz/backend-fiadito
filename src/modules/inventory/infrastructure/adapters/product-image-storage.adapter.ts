@@ -21,6 +21,21 @@ export interface UploadProductImageResult {
   imageUrl: string
 }
 
+export interface UploadBatchProductImageInput {
+  businessId: string
+  productId: string
+  files: Array<{
+    fileName: string
+    fileBuffer: Buffer
+  }>
+}
+
+interface UploadTarget {
+  relativePath: string
+  remotePath: string
+  fileBuffer: Buffer
+}
+
 type StorageProtocol = "ftp" | "sftp"
 
 @Injectable()
@@ -54,21 +69,40 @@ export class ProductImageStorageAdapter {
   }
 
   async uploadProductImage(input: UploadProductImageInput): Promise<UploadProductImageResult> {
+    const uploads = await this.uploadProductImages({
+      businessId: input.businessId,
+      productId: input.productId,
+      files: [{ fileName: input.fileName, fileBuffer: input.fileBuffer }]
+    })
+    return uploads[0]
+  }
+
+  async uploadProductImages(input: UploadBatchProductImageInput): Promise<UploadProductImageResult[]> {
     this.assertConfig()
 
-    const relativePath = `productos/${input.fileName}`
-    const remotePath = this.remoteBaseDir ? `${this.remoteBaseDir}/${relativePath}` : relativePath
+    if (input.files.length === 0) {
+      throw new BadRequestException("at least one image file is required")
+    }
+
+    const targets: UploadTarget[] = input.files.map((file) => {
+      const relativePath = `productos/${file.fileName}`
+      return {
+        relativePath,
+        remotePath: this.remoteBaseDir ? `${this.remoteBaseDir}/${relativePath}` : relativePath,
+        fileBuffer: file.fileBuffer
+      }
+    })
 
     if (this.protocol === "sftp") {
-      await this.uploadWithSftp(remotePath, input.fileBuffer)
+      await this.uploadManyWithSftp(targets)
     } else {
-      await this.uploadWithFtp(remotePath, input.fileBuffer)
+      await this.uploadManyWithFtp(targets)
     }
 
-    return {
-      remotePath,
-      imageUrl: `${this.publicBaseUrl}/${relativePath}`
-    }
+    return targets.map((target) => ({
+      remotePath: target.remotePath,
+      imageUrl: `${this.publicBaseUrl}/${target.relativePath}`
+    }))
   }
 
   async deleteFile(remotePath: string): Promise<void> {
@@ -120,7 +154,12 @@ export class ProductImageStorageAdapter {
   }
 
   private async uploadWithFtp(remotePath: string, fileBuffer: Buffer): Promise<void> {
+    await this.uploadManyWithFtp([{ remotePath, fileBuffer }])
+  }
+
+  private async uploadManyWithFtp(files: Array<{ remotePath: string; fileBuffer: Buffer }>): Promise<void> {
     const client = new BasicFtpClient()
+    const remoteDirectory = this.dirname(files[0]?.remotePath ?? "")
     try {
       await client.access({
         host: this.host,
@@ -129,8 +168,11 @@ export class ProductImageStorageAdapter {
         password: this.password,
         secure: this.secure
       })
-      await client.ensureDir(this.dirname(remotePath))
-      await client.uploadFrom(Readable.from(fileBuffer), this.basename(remotePath))
+      await client.ensureDir(remoteDirectory)
+
+      for (const file of files) {
+        await client.uploadFrom(Readable.from(file.fileBuffer), this.basename(file.remotePath))
+      }
     } catch (error) {
       this.handleUploadError(error)
     } finally {
@@ -139,7 +181,12 @@ export class ProductImageStorageAdapter {
   }
 
   private async uploadWithSftp(remotePath: string, fileBuffer: Buffer): Promise<void> {
+    await this.uploadManyWithSftp([{ remotePath, fileBuffer }])
+  }
+
+  private async uploadManyWithSftp(files: Array<{ remotePath: string; fileBuffer: Buffer }>): Promise<void> {
     const client = new SftpClient()
+    const remoteDirectory = this.dirname(files[0]?.remotePath ?? "")
     try {
       await client.connect({
         host: this.host,
@@ -147,8 +194,11 @@ export class ProductImageStorageAdapter {
         username: this.user,
         password: this.password
       })
-      await client.mkdir(this.dirname(remotePath), true)
-      await client.put(fileBuffer, remotePath)
+      await client.mkdir(remoteDirectory, true)
+
+      for (const file of files) {
+        await client.put(file.fileBuffer, file.remotePath)
+      }
     } catch (error) {
       this.handleUploadError(error)
     } finally {
