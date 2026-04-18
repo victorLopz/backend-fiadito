@@ -6,6 +6,7 @@ export class BusinessProfileMapper {
     return new BusinessProfile(
       entity.id,
       entity.legalName,
+      entity.logoUrl ?? null,
       entity.currencyCode ?? null,
       entity.countryCode ?? null,
       entity.timezone ?? null,

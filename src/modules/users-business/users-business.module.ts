@@ -3,6 +3,7 @@ import { TypeOrmModule } from "@nestjs/typeorm"
 import { AuthModule } from "../auth/auth.module"
 import { GetBusinessService } from "./application/use-cases/get-business.service"
 import { GetMeService } from "./application/use-cases/get-me.service"
+import { UploadBusinessLogoService } from "./application/use-cases/upload-business-logo.service"
 import { UpdateBusinessService } from "./application/use-cases/update-business.service"
 import { UpdateMeService } from "./application/use-cases/update-me.service"
 import {
@@ -16,6 +17,7 @@ import { TypeOrmUserProfileRepository } from "./infrastructure/persistence/repos
 import { UsersBusinessController } from "./presentation/controllers/users-business.controller"
 import { BusinessTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/business.typeorm-entity"
 import { UserTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/user.typeorm-entity"
+import { BusinessLogoStorageAdapter } from "./infrastructure/adapters/business-logo-storage.adapter"
 
 @Module({
   imports: [AuthModule, TypeOrmModule.forFeature([UserTypeOrmEntity, BusinessTypeOrmEntity])],
@@ -25,11 +27,19 @@ import { UserTypeOrmEntity } from "src/shared/infrastructure/persistence/entitie
     UpdateMeService,
     GetBusinessService,
     UpdateBusinessService,
+    UploadBusinessLogoService,
+    BusinessLogoStorageAdapter,
     TypeOrmUserProfileRepository,
     TypeOrmBusinessProfileRepository,
     { provide: USER_PROFILE_REPOSITORY, useExisting: TypeOrmUserProfileRepository },
     { provide: BUSINESS_PROFILE_REPOSITORY, useExisting: TypeOrmBusinessProfileRepository }
   ],
-  exports: [GetMeService, UpdateMeService, GetBusinessService, UpdateBusinessService]
+  exports: [
+    GetMeService,
+    UpdateMeService,
+    GetBusinessService,
+    UpdateBusinessService,
+    UploadBusinessLogoService
+  ]
 })
 export class UsersBusinessModule {}

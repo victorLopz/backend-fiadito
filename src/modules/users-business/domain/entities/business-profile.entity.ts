@@ -2,6 +2,7 @@ export class BusinessProfile {
   constructor(
     public readonly id: string,
     public readonly legalName: string,
+    public readonly logoUrl: string | null,
     public readonly currencyCode: string | null,
     public readonly countryCode: string | null,
     public readonly timezone: string | null,

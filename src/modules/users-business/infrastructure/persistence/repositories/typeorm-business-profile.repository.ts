@@ -22,6 +22,7 @@ export class TypeOrmBusinessProfileRepository implements BusinessProfileReposito
     id: string,
     input: {
       legalName?: string
+      logoUrl?: string
       currencyCode?: string
       countryCode?: string
       timezone?: string
@@ -33,6 +34,10 @@ export class TypeOrmBusinessProfileRepository implements BusinessProfileReposito
 
     if (input.legalName !== undefined) {
       payload.legalName = input.legalName
+    }
+
+    if (input.logoUrl !== undefined) {
+      payload.logoUrl = input.logoUrl
     }
 
     if (input.currencyCode !== undefined) {

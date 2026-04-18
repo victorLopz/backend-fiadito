@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Patch, UnauthorizedException, UseGuards } from "@nestjs/common"
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Post,
+  UnauthorizedException,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors
+} from "@nestjs/common"
+import { FileInterceptor } from "@nestjs/platform-express"
 import { CurrentUser } from "src/shared/common/decorators"
 import { JwtAuthGuard } from "src/shared/common/guards/jwt-auth.guard"
 import { AuthUser } from "src/shared/common/interfaces"
@@ -6,6 +17,10 @@ import { UpdateBusinessDto } from "../../application/dto/update-business.dto"
 import { UpdateMeDto } from "../../application/dto/update-me.dto"
 import { GetBusinessService } from "../../application/use-cases/get-business.service"
 import { GetMeService } from "../../application/use-cases/get-me.service"
+import {
+  UploadedLogoFile,
+  UploadBusinessLogoService
+} from "../../application/use-cases/upload-business-logo.service"
 import { UpdateBusinessService } from "../../application/use-cases/update-business.service"
 import { UpdateMeService } from "../../application/use-cases/update-me.service"
 
@@ -16,7 +31,8 @@ export class UsersBusinessController {
     private readonly getMeService: GetMeService,
     private readonly updateMeService: UpdateMeService,
     private readonly getBusinessService: GetBusinessService,
-    private readonly updateBusinessService: UpdateBusinessService
+    private readonly updateBusinessService: UpdateBusinessService,
+    private readonly uploadBusinessLogoService: UploadBusinessLogoService
   ) {}
 
   @Get("me")
@@ -39,6 +55,12 @@ export class UsersBusinessController {
   @Patch("business")
   updateBusiness(@CurrentUser() user: AuthUser, @Body() dto: UpdateBusinessDto) {
     return this.updateBusinessService.execute(user.businessId, dto)
+  }
+
+  @Post("business/logo")
+  @UseInterceptors(FileInterceptor("logo"))
+  uploadBusinessLogo(@CurrentUser() user: AuthUser, @UploadedFile() file?: UploadedLogoFile) {
+    return this.uploadBusinessLogoService.execute(user.businessId, file)
   }
 
   private getUserId(user: AuthUser): string {

@@ -16,6 +16,9 @@ export class BusinessTypeOrmEntity {
   @Column({ length: 120, name: "legal_name" })
   legalName!: string
 
+  @Column({ name: "logo_url", nullable: true })
+  logoUrl?: string
+
   // currency_code
   @Column({ length: 3, name: "currency_code", nullable: true, default: "NIO" })
   currencyCode?: string

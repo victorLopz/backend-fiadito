@@ -27,6 +27,10 @@ export class UpdateBusinessService {
       input.legalName = dto.legalName.trim()
     }
 
+    if (dto.logoUrl !== undefined) {
+      input.logoUrl = dto.logoUrl.trim()
+    }
+
     if (dto.currencyCode !== undefined) {
       input.currencyCode = dto.currencyCode.trim().toUpperCase()
     }
@@ -62,6 +66,7 @@ export class UpdateBusinessService {
     return {
       id: updatedBusiness.id,
       legalName: updatedBusiness.legalName,
+      logoUrl: updatedBusiness.logoUrl,
       currencyCode: updatedBusiness.currencyCode,
       countryCode: updatedBusiness.countryCode,
       timezone: updatedBusiness.timezone,

@@ -22,6 +22,7 @@ export class GetBusinessService {
     return {
       id: business.id,
       legalName: business.legalName,
+      logoUrl: business.logoUrl,
       currencyCode: business.currencyCode,
       countryCode: business.countryCode,
       timezone: business.timezone,

@@ -9,6 +9,11 @@ export class UpdateBusinessDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(500)
+  logoUrl?: string
+
+  @IsOptional()
+  @IsString()
   @MaxLength(3)
   currencyCode?: string
 

@@ -6,6 +6,7 @@ export interface BusinessProfileRepository {
   findById(id: string): Promise<BusinessProfile | null>
   update(id: string, input: {
     legalName?: string
+    logoUrl?: string
     currencyCode?: string
     countryCode?: string
     timezone?: string
