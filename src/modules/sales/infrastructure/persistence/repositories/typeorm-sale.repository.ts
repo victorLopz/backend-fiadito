@@ -16,6 +16,7 @@ import {
   In,
   LessThanOrEqual,
   MoreThanOrEqual,
+  IsNull,
   Repository
 } from "typeorm"
 import { SaleItemTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/sale-item.typeorm-entity"
@@ -50,7 +51,8 @@ export class TypeOrmSaleRepository implements ISaleRepository {
   async findHistory(filters: SaleHistoryFilters): Promise<SaleHistoryResult> {
     const where: FindOptionsWhere<SaleTypeOrmEntity> = {
       businessId: filters.businessId,
-      isActive: true
+      isActive: true,
+      deletedAt: IsNull()
     }
 
     if (filters.from && filters.to) {
@@ -138,7 +140,8 @@ export class TypeOrmSaleRepository implements ISaleRepository {
       where: {
         id,
         businessId,
-        isActive: true
+        isActive: true,
+        deletedAt: IsNull()
       }
     })
 

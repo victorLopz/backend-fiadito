@@ -7,6 +7,7 @@ import {
   Between,
   FindOptionsWhere,
   ILike,
+  IsNull,
   LessThanOrEqual,
   MoreThanOrEqual,
   Repository
@@ -175,7 +176,9 @@ export class TypeOrmCustomerRepository implements ICustomerRepository {
   }> {
     const where: FindOptionsWhere<SaleTypeOrmEntity> = {
       businessId: input.businessId,
-      customerId: input.customerId
+      customerId: input.customerId,
+      isActive: true,
+      deletedAt: IsNull()
     }
 
     if (input.from && input.to) {

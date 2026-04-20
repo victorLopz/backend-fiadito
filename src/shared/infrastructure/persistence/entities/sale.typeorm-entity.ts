@@ -40,6 +40,9 @@ export class SaleTypeOrmEntity {
   @Column({ type: "boolean", name: "is_active", default: true })
   isActive!: boolean
 
+  @Column({ type: "timestamptz", name: "deleted_at", nullable: true })
+  deletedAt!: Date | null
+
   @CreateDateColumn({ type: "timestamptz", name: "created_at" })
   createdAt!: Date
 }

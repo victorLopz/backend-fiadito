@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common"
-import { DeleteSaleQueryDto } from "src/modules/sales/application/dto/delete-sale-query.dto"
+import { DebtTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/debt.typeorm-entity"
+import { DebtStatus, SaleType } from "src/shared/infrastructure/persistence/entities/enums"
 import { SaleTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/sale.typeorm-entity"
 import { DataSource } from "typeorm"
 
@@ -13,6 +14,7 @@ export class DeleteSaleUseCase {
     }
 
     const saleRepo = this.dataSource.getRepository(SaleTypeOrmEntity)
+    const debtRepo = this.dataSource.getRepository(DebtTypeOrmEntity)
     const sale = await saleRepo.findOne({
       where: {
         id: saleId,
@@ -24,7 +26,34 @@ export class DeleteSaleUseCase {
       throw new NotFoundException("Sale not found")
     }
 
+    if (sale.type === SaleType.CREDIT) {
+      const debt = await debtRepo.findOne({
+        where: {
+          saleId,
+          businessId
+        }
+      })
+
+      if (debt && (debt.status === DebtStatus.OPEN || Number(debt.balance) > 0)) {
+        throw new BadRequestException(
+          "No se puede eliminar una venta a crédito con deuda pendiente o abierta"
+        )
+      }
+    }
+
     if (sale.isActive === false) {
+      if (!sale.deletedAt) {
+        await saleRepo.update(
+          {
+            id: saleId,
+            businessId
+          },
+          {
+            deletedAt: new Date()
+          }
+        )
+      }
+
       return {
         id: sale.id,
         action: "already_inactivated",
@@ -38,7 +67,8 @@ export class DeleteSaleUseCase {
         businessId
       },
       {
-        isActive: false
+        isActive: false,
+        deletedAt: new Date()
       }
     )
 
