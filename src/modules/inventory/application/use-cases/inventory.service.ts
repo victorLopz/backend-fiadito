@@ -403,6 +403,35 @@ export class InventoryService {
     }
   }
 
+  async deleteProductImage(
+    productId: string,
+    imageId: string,
+    businessId: string
+  ): Promise<{ deletedId: string }> {
+    if (!productId || !imageId || !businessId) {
+      throw new BadRequestException("productId, imageId and businessId are required")
+    }
+
+    const product = await this.productRepository.findById(productId, businessId)
+    if (!product) {
+      throw new NotFoundException("Product not found")
+    }
+
+    const image = await this.productImageRepository.findById(imageId, businessId, productId)
+    if (!image) {
+      throw new NotFoundException("Product image not found")
+    }
+
+    await this.productImageRepository.deleteById(imageId, businessId, productId)
+
+    const remotePath = this.productImageStorageAdapter.getRemotePathFromImageUrl(image.imageUrl)
+    if (remotePath) {
+      await this.productImageStorageAdapter.deleteFile(remotePath)
+    }
+
+    return { deletedId: imageId }
+  }
+
   async getProductsSnapshotForSale(
     businessId: string,
     productIds: string[],

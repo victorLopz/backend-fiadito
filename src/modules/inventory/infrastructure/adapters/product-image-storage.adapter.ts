@@ -141,6 +141,19 @@ export class ProductImageStorageAdapter {
     }
   }
 
+  getRemotePathFromImageUrl(imageUrl: string): string | null {
+    if (!imageUrl) {
+      return null
+    }
+
+    const relativePath = this.getRelativePathFromImageUrl(imageUrl)
+    if (!relativePath) {
+      return null
+    }
+
+    return this.remoteBaseDir ? `${this.remoteBaseDir}/${relativePath}` : relativePath
+  }
+
   private assertConfig(): void {
     if (!this.host || !this.user || !this.password || !this.publicBaseUrl) {
       throw new InternalServerErrorException("FTP configuration is incomplete")
@@ -230,6 +243,37 @@ export class ProductImageStorageAdapter {
 
   private trimSlashes(value: string): string {
     return value.replace(/^\/+|\/+$/g, "")
+  }
+
+  private getRelativePathFromImageUrl(imageUrl: string): string | null {
+    const normalizedImageUrl = imageUrl.trim()
+    const normalizedBaseUrl = this.publicBaseUrl.replace(/\/+$/, "")
+
+    if (normalizedBaseUrl && normalizedImageUrl.startsWith(`${normalizedBaseUrl}/`)) {
+      return this.trimSlashes(normalizedImageUrl.slice(normalizedBaseUrl.length + 1))
+    }
+
+    try {
+      const image = new URL(normalizedImageUrl)
+      if (normalizedBaseUrl) {
+        const base = new URL(normalizedBaseUrl)
+        const basePath = this.trimSlashes(base.pathname)
+        if (image.origin === base.origin) {
+          if (!basePath) {
+            return this.trimSlashes(image.pathname)
+          }
+
+          const normalizedPathname = this.trimSlashes(image.pathname)
+          if (normalizedPathname.startsWith(`${basePath}/`)) {
+            return this.trimSlashes(normalizedPathname.slice(basePath.length + 1))
+          }
+        }
+      }
+
+      return this.trimSlashes(image.pathname)
+    } catch {
+      return this.trimSlashes(normalizedImageUrl)
+    }
   }
 
   private dirname(pathValue: string): string {

@@ -1,7 +1,16 @@
 import { Injectable } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
 import { CustomerTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/customers.typeorm-entity"
-import { ILike, Repository } from "typeorm"
+import { SaleTypeOrmEntity } from "src/shared/infrastructure/persistence/entities/sale.typeorm-entity"
+import { SaleType } from "src/shared/infrastructure/persistence/entities/enums"
+import {
+  Between,
+  FindOptionsWhere,
+  ILike,
+  LessThanOrEqual,
+  MoreThanOrEqual,
+  Repository
+} from "typeorm"
 import { Customer } from "src/modules/customers/domain/entities/customer.entity"
 import { ICustomerRepository } from "src/modules/customers/domain/repositories/customer.repository"
 import { CustomerMapper } from "../mappers/customer.mapper"
@@ -10,7 +19,9 @@ import { CustomerMapper } from "../mappers/customer.mapper"
 export class TypeOrmCustomerRepository implements ICustomerRepository {
   constructor(
     @InjectRepository(CustomerTypeOrmEntity)
-    private readonly repository: Repository<CustomerTypeOrmEntity>
+    private readonly repository: Repository<CustomerTypeOrmEntity>,
+    @InjectRepository(SaleTypeOrmEntity)
+    private readonly salesRepository: Repository<SaleTypeOrmEntity>
   ) {}
 
   async create(input: {
@@ -126,5 +137,78 @@ export class TypeOrmCustomerRepository implements ICustomerRepository {
     })
 
     return items.map((item) => CustomerMapper.toDomain(item))
+  }
+
+  async delete(id: string, businessId: string): Promise<void> {
+    await this.repository.delete({ id, businessId })
+  }
+
+  async countInvoicesByCustomer(input: { businessId: string; customerId: string }): Promise<number> {
+    return this.salesRepository.count({
+      where: {
+        businessId: input.businessId,
+        customerId: input.customerId
+      }
+    })
+  }
+
+  async findInvoicesByCustomer(input: {
+    businessId: string
+    customerId: string
+    page: number
+    limit: number
+    from?: Date
+    to?: Date
+    type?: string
+  }): Promise<{
+    items: {
+      id: string
+      receiptNumber?: string
+      type: string
+      subtotal: number
+      discountTotal: number
+      total: number
+      itemsCount: number
+      createdAt: Date
+    }[]
+    total: number
+  }> {
+    const where: FindOptionsWhere<SaleTypeOrmEntity> = {
+      businessId: input.businessId,
+      customerId: input.customerId
+    }
+
+    if (input.from && input.to) {
+      where.createdAt = Between(input.from, input.to)
+    } else if (input.from) {
+      where.createdAt = MoreThanOrEqual(input.from)
+    } else if (input.to) {
+      where.createdAt = LessThanOrEqual(input.to)
+    }
+
+    if (input.type) {
+      where.type = input.type as SaleType
+    }
+
+    const [items, total] = await this.salesRepository.findAndCount({
+      where,
+      order: { createdAt: "DESC" },
+      skip: (input.page - 1) * input.limit,
+      take: input.limit
+    })
+
+    return {
+      items: items.map((item) => ({
+        id: item.id,
+        receiptNumber: item.receiptNumber,
+        type: item.type,
+        subtotal: Number(item.subtotal),
+        discountTotal: Number(item.discountTotal),
+        total: Number(item.total),
+        itemsCount: item.itemsCount,
+        createdAt: item.createdAt
+      })),
+      total
+    }
   }
 }

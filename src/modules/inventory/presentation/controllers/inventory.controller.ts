@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseUUIDPipe,
@@ -63,5 +64,14 @@ export class InventoryController {
     @UploadedFiles() files?: UploadedImageFile[]
   ) {
     return this.inventoryService.uploadProductImages(id, businessId, files)
+  }
+
+  @Delete(":id/image/:imageId")
+  deleteImage(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Param("imageId", ParseUUIDPipe) imageId: string,
+    @BusinessId() businessId: string
+  ) {
+    return this.inventoryService.deleteProductImage(id, imageId, businessId)
   }
 }

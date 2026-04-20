@@ -2,6 +2,27 @@ import { Customer } from "../entities/customer.entity"
 
 export const CUSTOMER_REPOSITORY = Symbol("CUSTOMER_REPOSITORY")
 
+export interface CustomerInvoicesFilters {
+  businessId: string
+  customerId: string
+  page: number
+  limit: number
+  from?: Date
+  to?: Date
+  type?: string
+}
+
+export interface CustomerInvoiceSummary {
+  id: string
+  receiptNumber?: string
+  type: string
+  subtotal: number
+  discountTotal: number
+  total: number
+  itemsCount: number
+  createdAt: Date
+}
+
 export interface ICustomerRepository {
   create(input: {
     businessId: string
@@ -29,4 +50,9 @@ export interface ICustomerRepository {
     isActive?: boolean
     name?: string
   }): Promise<Customer[]>
+  delete(id: string, businessId: string): Promise<void>
+  countInvoicesByCustomer(input: { businessId: string; customerId: string }): Promise<number>
+  findInvoicesByCustomer(
+    filters: CustomerInvoicesFilters
+  ): Promise<{ items: CustomerInvoiceSummary[]; total: number }>
 }

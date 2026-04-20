@@ -21,6 +21,7 @@ export class SaleMapper {
       discountTotal: sale.discountTotal.toFixed(2),
       total: sale.total.toFixed(2),
       itemsCount: sale.itemsCount,
+      isActive: true,
       receiptNumber: sale.receiptNumber,
       createdAt: sale.createdAt
     }

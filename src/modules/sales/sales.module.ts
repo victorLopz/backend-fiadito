@@ -6,6 +6,7 @@ import { DEBT_REPOSITORY } from "src/modules/debts/domain/repositories/debt.repo
 import { TypeOrmDebtRepository } from "src/modules/debts/infrastructure/repositories/typeorm-debt.repository"
 import { InventoryModule } from "src/modules/inventory/inventory.module"
 import { CreateSaleUseCase } from "src/modules/sales/application/use-cases/create-sale.use-case"
+import { DeleteSaleUseCase } from "src/modules/sales/application/use-cases/delete-sale.use-case"
 import { ListSalesUseCase } from "src/modules/sales/application/use-cases/list-sales.use-case"
 import { SALE_REPOSITORY } from "src/modules/sales/domain/repositories/sale.repository"
 import { VoucherImgAdapter } from "src/modules/sales/infrastructure/adapters/voucher-img.adapter"
@@ -37,6 +38,7 @@ import { FindOneSaleUseCase } from "./application/use-cases/find-one-sales.use-c
     CreateSaleUseCase,
     ListSalesUseCase,
     FindOneSaleUseCase,
+    DeleteSaleUseCase,
     VoucherImgAdapter,
     SaleMapper,
     TypeOrmDebtRepository,
@@ -44,6 +46,6 @@ import { FindOneSaleUseCase } from "./application/use-cases/find-one-sales.use-c
     { provide: DEBT_REPOSITORY, useExisting: TypeOrmDebtRepository },
     { provide: SALE_REPOSITORY, useExisting: TypeOrmSaleRepository }
   ],
-  exports: [CreateSaleUseCase, ListSalesUseCase, FindOneSaleUseCase]
+  exports: [CreateSaleUseCase, ListSalesUseCase, FindOneSaleUseCase, DeleteSaleUseCase]
 })
 export class SalesModule {}

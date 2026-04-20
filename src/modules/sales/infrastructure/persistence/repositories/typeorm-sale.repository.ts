@@ -49,7 +49,8 @@ export class TypeOrmSaleRepository implements ISaleRepository {
 
   async findHistory(filters: SaleHistoryFilters): Promise<SaleHistoryResult> {
     const where: FindOptionsWhere<SaleTypeOrmEntity> = {
-      businessId: filters.businessId
+      businessId: filters.businessId,
+      isActive: true
     }
 
     if (filters.from && filters.to) {
@@ -136,7 +137,8 @@ export class TypeOrmSaleRepository implements ISaleRepository {
     const saleEntity = await this.salesRepository.findOne({
       where: {
         id,
-        businessId
+        businessId,
+        isActive: true
       }
     })
 

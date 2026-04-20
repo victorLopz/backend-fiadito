@@ -37,6 +37,9 @@ export class SaleTypeOrmEntity {
   @Column({ type: "text", nullable: true })
   notes?: string
 
+  @Column({ type: "boolean", name: "is_active", default: true })
+  isActive!: boolean
+
   @CreateDateColumn({ type: "timestamptz", name: "created_at" })
   createdAt!: Date
 }

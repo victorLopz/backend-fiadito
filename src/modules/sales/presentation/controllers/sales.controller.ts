@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common"
+import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards } from "@nestjs/common"
 import { CreateSaleDto } from "src/modules/sales/application/dto/create-sale.dto"
 import { ListSalesQueryDto } from "src/modules/sales/application/dto/list-sales-query.dto"
 import { CreateSaleUseCase } from "src/modules/sales/application/use-cases/create-sale.use-case"
+import { DeleteSaleUseCase } from "src/modules/sales/application/use-cases/delete-sale.use-case"
 import { ListSalesUseCase } from "src/modules/sales/application/use-cases/list-sales.use-case"
 import { BusinessId, CurrentUser } from "src/shared/common/decorators"
 import { JwtAuthGuard } from "src/shared/common/guards/jwt-auth.guard"
@@ -14,7 +15,8 @@ export class SalesController {
   constructor(
     private readonly createSaleUseCase: CreateSaleUseCase,
     private readonly listSalesUseCase: ListSalesUseCase,
-    private readonly findOneSaleUseCase: FindOneSaleUseCase
+    private readonly findOneSaleUseCase: FindOneSaleUseCase,
+    private readonly deleteSaleUseCase: DeleteSaleUseCase
   ) {}
 
   @Post()
@@ -34,5 +36,10 @@ export class SalesController {
   @Get(":id")
   findOne(@BusinessId() businessId: string, @Param("id") saleId: string) {
     return this.findOneSaleUseCase.execute(businessId, saleId)
+  }
+
+  @Delete(":id")
+  delete(@BusinessId() businessId: string, @Param("id") saleId: string) {
+    return this.deleteSaleUseCase.execute(businessId, saleId)
   }
 }

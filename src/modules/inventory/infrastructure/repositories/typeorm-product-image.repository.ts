@@ -61,11 +61,25 @@ export class TypeOrmProductImageRepository implements ProductImageRepository {
     })
   }
 
+  async findById(
+    id: string,
+    businessId: string,
+    productId: string
+  ): Promise<ProductImageTypeOrmEntity | null> {
+    return this.repository.findOne({
+      where: { id, businessId, productId }
+    })
+  }
+
   async deleteByIds(ids: string[]): Promise<void> {
     if (ids.length === 0) {
       return
     }
 
     await this.repository.delete(ids)
+  }
+
+  async deleteById(id: string, businessId: string, productId: string): Promise<void> {
+    await this.repository.delete({ id, businessId, productId })
   }
 }
