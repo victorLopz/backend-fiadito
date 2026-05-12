@@ -8,9 +8,11 @@ import { DashboardModule } from "./modules/dashboard/dashboard.module"
 import { DebtsModule } from "./modules/debts/debts.module"
 import { CustomersModule } from "./modules/customers/customers.module"
 import { InventoryModule } from "./modules/inventory/inventory.module"
+import { MembershipsModule } from "./modules/memberships/memberships.module"
 import { SalesModule } from "./modules/sales/sales.module"
 import { UsersBusinessModule } from "./modules/users-business/users-business.module"
 import { JwtAuthGuard } from "./shared/common/guards/jwt-auth.guard"
+import { MembershipGuard } from "./shared/common/guards/membership.guard"
 import { BusinessContextMiddleware } from "./shared/common/middlewares"
 import { TYPEORM_ENTITIES } from "./shared/infrastructure/persistence/entities"
 
@@ -33,6 +35,7 @@ import { TYPEORM_ENTITIES } from "./shared/infrastructure/persistence/entities"
       })
     }),
     AuthModule,
+    MembershipsModule,
     DashboardModule,
     InventoryModule,
     SalesModule,
@@ -50,6 +53,10 @@ import { TYPEORM_ENTITIES } from "./shared/infrastructure/persistence/entities"
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard
+    },
+    {
+      provide: APP_GUARD,
+      useClass: MembershipGuard
     }
   ]
 })

@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common"
 import { TypeOrmModule } from "@nestjs/typeorm"
 import { AuthModule } from "../auth/auth.module"
+import { MembershipsModule } from "../memberships/memberships.module"
 import { InventoryService } from "./application/use-cases/inventory.service"
 import { INVENTORY_MOVEMENT_REPOSITORY } from "./domain/repositories/inventory-movement.repository"
 import { PRODUCT_IMAGE_REPOSITORY } from "./domain/repositories/product-image.repository"
@@ -17,6 +18,7 @@ import { ProductImageStorageAdapter } from "./infrastructure/adapters/product-im
 @Module({
   imports: [
     AuthModule,
+    MembershipsModule,
     TypeOrmModule.forFeature([
       ProductTypeOrmEntity,
       ProductImageTypeOrmEntity,

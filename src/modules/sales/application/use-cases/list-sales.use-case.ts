@@ -1,5 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common"
 import { ListSalesQueryDto } from "src/modules/sales/application/dto/list-sales-query.dto"
+import { MembershipService } from "src/modules/memberships/application/use-cases/membership.service"
 import {
   ISaleRepository,
   SALE_REPOSITORY
@@ -9,14 +10,19 @@ import {
 export class ListSalesUseCase {
   constructor(
     @Inject(SALE_REPOSITORY)
-    private readonly saleRepository: ISaleRepository
+    private readonly saleRepository: ISaleRepository,
+    private readonly membershipService: MembershipService
   ) {}
 
   async execute(businessId: string, query: ListSalesQueryDto): Promise<Record<string, unknown>> {
     const page = query.page ?? 1
     const limit = query.limit ?? 20
 
-    const from = query.from ? new Date(query.from) : undefined
+    const requestedFrom = query.from ? new Date(query.from) : undefined
+    const earliestAllowedFrom = await this.membershipService.getAllowedSalesHistoryStartDate(
+      businessId
+    )
+    const from = this.maxDate(requestedFrom, earliestAllowedFrom)
     const to = query.to ? new Date(query.to) : undefined
 
     const type = query.type ? query.type : undefined
@@ -54,5 +60,11 @@ export class ListSalesUseCase {
       total,
       totalPages: Math.ceil(total / limit)
     }
+  }
+
+  private maxDate(left?: Date, right?: Date): Date | undefined {
+    if (!left) return right
+    if (!right) return left
+    return left.getTime() > right.getTime() ? left : right
   }
 }

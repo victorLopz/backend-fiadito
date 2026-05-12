@@ -12,7 +12,7 @@
     "test": "jest",
     "migration:generate": "typeorm-ts-node-commonjs -d typeorm.datasource.ts migration:generate src/database/migrations/AutoMigration",
     "migration:create": "typeorm-ts-node-commonjs -d typeorm.datasource.ts migration:create src/database/migrations/ManualMigration",
-    "migration:run": "typeorm-ts-node-commonjs -d typeorm.datasource.ts migration:run",
+    "migration:run": "ts-node src/database/run-migrations.ts",
     "migration:revert": "typeorm-ts-node-commonjs -d typeorm.datasource.ts migration:revert"
   },
   "dependencies": {

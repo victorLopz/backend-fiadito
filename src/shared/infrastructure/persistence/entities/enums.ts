@@ -39,3 +39,31 @@ export enum WhatsappMessageType {
   SALE_RECEIPT = "SALE_RECEIPT",
   CUSTOM = "CUSTOM"
 }
+
+export enum MembershipPlanCode {
+  FREE = "FREE",
+  LITE = "LITE",
+  PRO = "PRO"
+}
+
+export enum MembershipSubscriptionStatus {
+  ACTIVE = "ACTIVE",
+  PAST_DUE = "PAST_DUE",
+  EXPIRED = "EXPIRED",
+  CANCELLED = "CANCELLED"
+}
+
+export enum MembershipPaymentStatus {
+  PENDING = "PENDING",
+  PAID = "PAID",
+  FAILED = "FAILED",
+  REFUNDED = "REFUNDED"
+}
+
+export enum MembershipPaymentMethod {
+  CASH = "CASH",
+  BANK_TRANSFER = "BANK_TRANSFER",
+  CARD = "CARD",
+  MANUAL = "MANUAL",
+  OTHER = "OTHER"
+}

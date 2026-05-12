@@ -20,7 +20,8 @@ import {
   USER_REPOSITORY,
   UserRepository
 } from "src/modules/auth/domain/repositories/user.repository"
-import { OtpPurpose, UserRole } from "src/shared/infrastructure/persistence/entities/enums"
+import { MembershipPlanCode, OtpPurpose, UserRole } from "src/shared/infrastructure/persistence/entities/enums"
+import { MembershipService } from "src/modules/memberships/application/use-cases/membership.service"
 
 type SessionResponse = {
   session: {
@@ -28,6 +29,20 @@ type SessionResponse = {
     refreshToken: string
     expiresIn: number
     tokenType: "Bearer"
+    plan: {
+      id: string
+      code: MembershipPlanCode
+      name: string
+      description?: string
+      productLimit?: number | null
+      customerLimit?: number | null
+      historyDays?: number | null
+      allowProductImages: boolean
+      monthlyPrice: number
+      billingPeriodDays: number
+      gracePeriodDays: number
+      isActive: boolean
+    } | null
     business: {
       id: string
       name: string
@@ -82,6 +97,7 @@ export class AuthService {
     private readonly tokenRepository: TokenRepository,
     @Inject(SESSION_REPOSITORY)
     private readonly sessionRepository: SessionRepository,
+    private readonly membershipService: MembershipService,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService
   ) {
@@ -141,6 +157,15 @@ export class AuthService {
       passwordHash,
       role: this.parseUserRole(input.role)
     })
+
+    await this.membershipService.activate(
+      business.id,
+      {
+        planCode: MembershipPlanCode.FREE,
+        amount: 0
+      },
+      user.id
+    )
 
     return {
       id: user.id,
@@ -310,6 +335,7 @@ export class AuthService {
     if (!business) {
       throw new UnauthorizedException("Business not found for this user")
     }
+    const membership = await this.membershipService.getStatus(user.businessId)
 
     await this.sessionRepository.create({
       businessId: user.businessId,
@@ -332,6 +358,7 @@ export class AuthService {
         refreshToken: `${refreshToken.id}.${refreshSecret}`,
         expiresIn: this.accessExpiresInSeconds,
         tokenType: "Bearer",
+        plan: membership.subscription?.plan ?? null,
         business: {
           id: business.id,
           name: business.name,
@@ -358,7 +385,7 @@ export class AuthService {
 
   private parseUserRole(role?: UserRole): UserRole {
     if (!role) {
-      return UserRole.CASHIER
+      return UserRole.OWNER
     }
 
     if (Object.values(UserRole).includes(role)) {

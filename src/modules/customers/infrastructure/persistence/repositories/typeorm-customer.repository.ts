@@ -140,6 +140,10 @@ export class TypeOrmCustomerRepository implements ICustomerRepository {
     return items.map((item) => CustomerMapper.toDomain(item))
   }
 
+  countActiveByBusiness(businessId: string): Promise<number> {
+    return this.repository.count({ where: { businessId, isActive: true } })
+  }
+
   async delete(id: string, businessId: string): Promise<void> {
     await this.repository.delete({ id, businessId })
   }

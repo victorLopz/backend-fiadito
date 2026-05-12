@@ -7,6 +7,7 @@ import { CustomerTypeOrmEntity } from "./customers.typeorm-entity"
 import { DebtPaymentTypeOrmEntity } from "./debt-payment.typeorm-entity"
 import { DebtTypeOrmEntity } from "./debt.typeorm-entity"
 import { InventoryMovementTypeOrmEntity } from "./inventory-movement.typeorm-entity"
+import { MembershipPaymentTypeOrmEntity } from "./membership-payment.typeorm-entity"
 import { OtpCodeTypeOrmEntity } from "./otp-code.typeorm-entity"
 import { PlanTypeOrmEntity } from "./plan.typeorm-entity"
 import { ProductTypeOrmEntity } from "./product.typeorm-entity"
@@ -27,6 +28,7 @@ export const TYPEORM_ENTITIES = [
   OtpCodeTypeOrmEntity,
   PlanTypeOrmEntity,
   BusinessSubscriptionTypeOrmEntity,
+  MembershipPaymentTypeOrmEntity,
   ProductTypeOrmEntity,
   ProductImageTypeOrmEntity,
   InventoryMovementTypeOrmEntity,

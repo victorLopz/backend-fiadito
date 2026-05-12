@@ -9,6 +9,7 @@ import {
   JoinColumn
 } from "typeorm"
 import { BusinessTypeOrmEntity } from "./business.typeorm-entity"
+import { UserRole } from "./enums"
 
 @Entity("users")
 @Index(["businessId", "email"], { unique: true })
@@ -93,6 +94,14 @@ export class UserTypeOrmEntity {
   /* ================================
      STATUS
   ================================= */
+  @Column({
+    type: "enum",
+    enum: UserRole,
+    enumName: "users_role_enum",
+    default: UserRole.CASHIER
+  })
+  role!: UserRole
+
   @Column({
     name: "is_active",
     type: "boolean",

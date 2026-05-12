@@ -21,6 +21,7 @@ export interface ProductRepository {
     input: Partial<ProductTypeOrmEntity>
   ): Promise<ProductTypeOrmEntity>
   deactivate(id: string, businessId: string): Promise<boolean>
+  countActiveByBusiness(businessId: string): Promise<number>
   findLowStockPaginated(input: {
     businessId: string
     page: number

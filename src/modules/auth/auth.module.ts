@@ -4,6 +4,7 @@ import { JwtModule } from "@nestjs/jwt"
 import { PassportModule } from "@nestjs/passport"
 import { TypeOrmModule } from "@nestjs/typeorm"
 import { AuthService } from "./application/use-cases/auth.service"
+import { MembershipsModule } from "src/modules/memberships/memberships.module"
 import { BUSINESS_REPOSITORY } from "./domain/repositories/business.repository"
 import { OTP_REPOSITORY } from "./domain/repositories/otp.repository"
 import { SESSION_REPOSITORY } from "./domain/repositories/session.repository"
@@ -26,6 +27,7 @@ import { UserTypeOrmEntity } from "src/shared/infrastructure/persistence/entitie
 @Module({
   imports: [
     ConfigModule,
+    MembershipsModule,
     PassportModule.register({ defaultStrategy: "jwt" }),
     JwtModule.registerAsync({
       inject: [ConfigService],

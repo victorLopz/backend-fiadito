@@ -5,6 +5,7 @@ import { CustomersModule } from "src/modules/customers/customers.module"
 import { DEBT_REPOSITORY } from "src/modules/debts/domain/repositories/debt.repository"
 import { TypeOrmDebtRepository } from "src/modules/debts/infrastructure/repositories/typeorm-debt.repository"
 import { InventoryModule } from "src/modules/inventory/inventory.module"
+import { MembershipsModule } from "src/modules/memberships/memberships.module"
 import { CreateSaleUseCase } from "src/modules/sales/application/use-cases/create-sale.use-case"
 import { DeleteSaleUseCase } from "src/modules/sales/application/use-cases/delete-sale.use-case"
 import { ListSalesUseCase } from "src/modules/sales/application/use-cases/list-sales.use-case"
@@ -25,6 +26,7 @@ import { FindOneSaleUseCase } from "./application/use-cases/find-one-sales.use-c
     AuthModule,
     CustomersModule,
     InventoryModule,
+    MembershipsModule,
     TypeOrmModule.forFeature([
       SaleTypeOrmEntity,
       SaleItemTypeOrmEntity,

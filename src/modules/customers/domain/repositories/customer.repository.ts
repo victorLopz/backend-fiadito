@@ -50,6 +50,7 @@ export interface ICustomerRepository {
     isActive?: boolean
     name?: string
   }): Promise<Customer[]>
+  countActiveByBusiness(businessId: string): Promise<number>
   delete(id: string, businessId: string): Promise<void>
   countInvoicesByCustomer(input: { businessId: string; customerId: string }): Promise<number>
   findInvoicesByCustomer(

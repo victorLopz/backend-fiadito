@@ -4,12 +4,14 @@ import {
   CUSTOMER_REPOSITORY,
   ICustomerRepository
 } from "src/modules/customers/domain/repositories/customer.repository"
+import { MembershipService } from "src/modules/memberships/application/use-cases/membership.service"
 
 @Injectable()
 export class ListCustomerInvoicesService {
   constructor(
     @Inject(CUSTOMER_REPOSITORY)
-    private readonly customerRepository: ICustomerRepository
+    private readonly customerRepository: ICustomerRepository,
+    private readonly membershipService: MembershipService
   ) {}
 
   async execute(
@@ -25,7 +27,11 @@ export class ListCustomerInvoicesService {
 
     const page = query.page ?? 1
     const limit = query.limit ?? 20
-    const from = query.from ? new Date(query.from) : undefined
+    const requestedFrom = query.from ? new Date(query.from) : undefined
+    const earliestAllowedFrom = await this.membershipService.getAllowedSalesHistoryStartDate(
+      businessId
+    )
+    const from = this.maxDate(requestedFrom, earliestAllowedFrom)
     const to = query.to ? new Date(query.to) : undefined
 
     if (to) {
@@ -54,5 +60,11 @@ export class ListCustomerInvoicesService {
       total,
       totalPages: Math.ceil(total / limit)
     }
+  }
+
+  private maxDate(left?: Date, right?: Date): Date | undefined {
+    if (!left) return right
+    if (!right) return left
+    return left.getTime() > right.getTime() ? left : right
   }
 }

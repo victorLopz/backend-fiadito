@@ -61,6 +61,10 @@ export class TypeOrmProductRepository implements ProductRepository {
     return !!result.affected
   }
 
+  countActiveByBusiness(businessId: string): Promise<number> {
+    return this.repository.count({ where: { businessId, isActive: true } })
+  }
+
   async findLowStockPaginated(input: {
     businessId: string
     page: number

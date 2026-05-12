@@ -12,6 +12,7 @@ import { ListLowStockQueryDto } from "../dto/list-low-stock-query.dto"
 import { ListProductsQueryDto } from "../dto/list-products-query.dto"
 import { UpdateProductDto } from "../dto/update-product.dto"
 import { ProductImageStorageAdapter } from "src/modules/inventory/infrastructure/adapters/product-image-storage.adapter"
+import { MembershipService } from "src/modules/memberships/application/use-cases/membership.service"
 import {
   INVENTORY_MOVEMENT_REPOSITORY,
   InventoryMovementRepository
@@ -85,6 +86,7 @@ export class InventoryService {
     @Inject(INVENTORY_MOVEMENT_REPOSITORY)
     private readonly inventoryMovementRepository: InventoryMovementRepository,
     private readonly productImageStorageAdapter: ProductImageStorageAdapter,
+    private readonly membershipService: MembershipService,
     private readonly configService: ConfigService
   ) {
     const maxMb = Number(this.configService.get<string>("PRODUCT_IMAGE_MAX_SIZE_MB") ?? 5)
@@ -101,6 +103,7 @@ export class InventoryService {
     }
 
     const initialStock = dto.initialStock ?? 0
+    await this.assertProductLimitAllowsCreate(businessId)
 
     const product = await this.productRepository.create({
       businessId,
@@ -346,6 +349,8 @@ export class InventoryService {
       throw new BadRequestException(`maximum ${this.maxFilesPerUpload} images are allowed`)
     }
 
+    await this.assertProductImagesAllowed(businessId)
+
     const product = await this.productRepository.findById(productId, businessId)
     if (!product) {
       throw new NotFoundException("Product not found")
@@ -515,6 +520,34 @@ export class InventoryService {
 
   private toMoney(amount: number): string {
     return amount.toFixed(2)
+  }
+
+  private async assertProductLimitAllowsCreate(businessId: string): Promise<void> {
+    const membership = await this.membershipService.getStatus(businessId)
+    if (!membership.allowed) {
+      throw new BadRequestException("Business membership is not active")
+    }
+
+    const productLimit = membership.subscription?.plan?.productLimit
+    if (productLimit === undefined || productLimit === null || productLimit < 0) {
+      return
+    }
+
+    const activeProducts = await this.productRepository.countActiveByBusiness(businessId)
+    if (activeProducts >= productLimit) {
+      throw new BadRequestException("Membership product limit reached")
+    }
+  }
+
+  private async assertProductImagesAllowed(businessId: string): Promise<void> {
+    const membership = await this.membershipService.getStatus(businessId)
+    if (!membership.allowed) {
+      throw new BadRequestException("Business membership is not active")
+    }
+
+    if (!membership.subscription?.plan?.allowProductImages) {
+      throw new BadRequestException("Membership plan does not allow product image uploads")
+    }
   }
 
   private validateUploadedImageFile(file?: UploadedImageFile): void {

@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common"
 import { TypeOrmModule } from "@nestjs/typeorm"
 import { AuthModule } from "../auth/auth.module"
+import { MembershipsModule } from "../memberships/memberships.module"
 import { CreateCustomerService } from "./application/use-cases/create-customer.service"
 import { DeleteCustomerService } from "./application/use-cases/delete-customer.service"
 import { GetCustomersService } from "./application/use-cases/get-customers.service"
@@ -15,7 +16,11 @@ import { ClientsController } from "./presentation/controllers/clients.controller
 import { CustomersController } from "./presentation/controllers/customers.controller"
 
 @Module({
-  imports: [AuthModule, TypeOrmModule.forFeature([CustomerTypeOrmEntity, SaleTypeOrmEntity])],
+  imports: [
+    AuthModule,
+    MembershipsModule,
+    TypeOrmModule.forFeature([CustomerTypeOrmEntity, SaleTypeOrmEntity])
+  ],
   controllers: [CustomersController, ClientsController],
   providers: [
     CreateCustomerService,
