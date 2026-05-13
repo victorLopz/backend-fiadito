@@ -11,4 +11,5 @@ export interface TokenRepository {
   }): Promise<AuthTokenTypeOrmEntity>
   findActiveRefreshTokenById(tokenId: string): Promise<AuthTokenTypeOrmEntity | null>
   revokeToken(tokenId: string): Promise<void>
+  revokeActiveRefreshTokensForUser(userId: string): Promise<void>
 }

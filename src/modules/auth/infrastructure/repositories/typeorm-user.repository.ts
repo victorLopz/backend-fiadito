@@ -45,6 +45,12 @@ export class TypeOrmUserRepository implements UserRepository {
     )
   }
 
+  async findById(id: string): Promise<UserTypeOrmEntity | null> {
+    return this.repository.findOne({
+      where: { id }
+    })
+  }
+
   async findActiveByPhone(phone: string): Promise<UserTypeOrmEntity | null> {
     return this.repository.findOne({
       where: { phoneE164: phone, isActive: true }
@@ -58,5 +64,9 @@ export class TypeOrmUserRepository implements UserRepository {
     return this.repository.findOne({
       where: { id, businessId, isActive: true }
     })
+  }
+
+  async updatePasswordHash(userId: string, passwordHash: string): Promise<void> {
+    await this.repository.update({ id: userId }, { passwordHash })
   }
 }

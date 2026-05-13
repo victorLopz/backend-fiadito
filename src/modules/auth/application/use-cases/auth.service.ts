@@ -388,6 +388,10 @@ export class AuthService {
       return UserRole.OWNER
     }
 
+    if (role === UserRole.SUPERADMIN) {
+      throw new BadRequestException("Invalid user role")
+    }
+
     if (Object.values(UserRole).includes(role)) {
       return role
     }

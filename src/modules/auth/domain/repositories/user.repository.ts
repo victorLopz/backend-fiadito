@@ -15,6 +15,8 @@ export interface UserRepository {
     passwordHash: string
     role: UserRole
   }): Promise<UserTypeOrmEntity>
+  findById(id: string): Promise<UserTypeOrmEntity | null>
   findActiveByPhone(phone: string): Promise<UserTypeOrmEntity | null>
   findActiveByIdAndBusiness(id: string, businessId: string): Promise<UserTypeOrmEntity | null>
+  updatePasswordHash(userId: string, passwordHash: string): Promise<void>
 }

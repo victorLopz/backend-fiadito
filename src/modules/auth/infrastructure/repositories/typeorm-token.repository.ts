@@ -43,4 +43,11 @@ export class TypeOrmTokenRepository implements TokenRepository {
   async revokeToken(tokenId: string): Promise<void> {
     await this.repository.update({ id: tokenId }, { revokedAt: new Date() })
   }
+
+  async revokeActiveRefreshTokensForUser(userId: string): Promise<void> {
+    await this.repository.update(
+      { userId, type: TokenType.REFRESH, revokedAt: IsNull() },
+      { revokedAt: new Date() }
+    )
+  }
 }

@@ -4,6 +4,7 @@ import { JwtModule } from "@nestjs/jwt"
 import { PassportModule } from "@nestjs/passport"
 import { TypeOrmModule } from "@nestjs/typeorm"
 import { AuthService } from "./application/use-cases/auth.service"
+import { ChangeSuperadminPasswordService } from "./application/use-cases/change-superadmin-password.service"
 import { MembershipsModule } from "src/modules/memberships/memberships.module"
 import { BUSINESS_REPOSITORY } from "./domain/repositories/business.repository"
 import { OTP_REPOSITORY } from "./domain/repositories/otp.repository"
@@ -50,6 +51,7 @@ import { UserTypeOrmEntity } from "src/shared/infrastructure/persistence/entitie
   controllers: [AuthController],
   providers: [
     AuthService,
+    ChangeSuperadminPasswordService,
     TypeOrmUserRepository,
     TypeOrmBusinessRepository,
     TypeOrmOtpRepository,
