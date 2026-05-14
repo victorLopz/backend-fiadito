@@ -10,7 +10,7 @@ export class AuditLogTypeOrmEntity {
   businessId!: string
 
   @Column("uuid", { nullable: true })
-  userId?: string
+  userId?: string | null
 
   @Column()
   action!: string

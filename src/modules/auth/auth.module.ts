@@ -5,6 +5,8 @@ import { PassportModule } from "@nestjs/passport"
 import { TypeOrmModule } from "@nestjs/typeorm"
 import { AuthService } from "./application/use-cases/auth.service"
 import { ChangeSuperadminPasswordService } from "./application/use-cases/change-superadmin-password.service"
+import { DeleteUserService } from "./application/use-cases/delete-user.service"
+import { DeleteUsersService } from "./application/use-cases/delete-users.service"
 import { MembershipsModule } from "src/modules/memberships/memberships.module"
 import { BUSINESS_REPOSITORY } from "./domain/repositories/business.repository"
 import { OTP_REPOSITORY } from "./domain/repositories/otp.repository"
@@ -52,6 +54,8 @@ import { UserTypeOrmEntity } from "src/shared/infrastructure/persistence/entitie
   providers: [
     AuthService,
     ChangeSuperadminPasswordService,
+    DeleteUserService,
+    DeleteUsersService,
     TypeOrmUserRepository,
     TypeOrmBusinessRepository,
     TypeOrmOtpRepository,

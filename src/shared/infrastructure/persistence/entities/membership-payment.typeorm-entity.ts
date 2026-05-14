@@ -7,10 +7,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn
 } from "typeorm"
-import {
-  MembershipPaymentMethod,
-  MembershipPaymentStatus
-} from "./enums"
+import { MembershipPaymentMethod, MembershipPaymentStatus } from "./enums"
 import { BusinessSubscriptionTypeOrmEntity } from "./business-subscription.typeorm-entity"
 import { BusinessTypeOrmEntity } from "./business.typeorm-entity"
 import { PlanTypeOrmEntity } from "./plan.typeorm-entity"
@@ -68,7 +65,7 @@ export class MembershipPaymentTypeOrmEntity {
   periodEnd!: Date
 
   @Column({ type: "uuid", name: "created_by", nullable: true })
-  createdBy?: string
+  createdBy?: string | null
 
   @Column({ type: "jsonb", nullable: true })
   metadata?: Record<string, unknown>

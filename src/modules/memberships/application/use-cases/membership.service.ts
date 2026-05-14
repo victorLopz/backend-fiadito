@@ -323,10 +323,9 @@ export class MembershipService {
   }
 
   private hasAccess(status: MembershipSubscriptionStatus): boolean {
-    return [
-      MembershipSubscriptionStatus.ACTIVE,
-      MembershipSubscriptionStatus.PAST_DUE
-    ].includes(status)
+    return [MembershipSubscriptionStatus.ACTIVE, MembershipSubscriptionStatus.PAST_DUE].includes(
+      status
+    )
   }
 
   private toAccessReason(status: MembershipSubscriptionStatus): MembershipAccessReason {
@@ -349,7 +348,8 @@ export class MembershipService {
       monthlyPrice: Number(plan.monthlyPrice),
       billingPeriodDays: plan.billingPeriodDays,
       gracePeriodDays: plan.gracePeriodDays,
-      isActive: plan.isActive
+      isActive: plan.isActive,
+      price: Number(plan.monthlyPrice)
     }
   }
 
