@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   ParseUUIDPipe,
   Post,
@@ -102,6 +103,12 @@ export class AuthController {
   @UseGuards(RolesGuard)
   deleteUsersAsSuperadmin(@Query() query: DeleteUsersQueryDto, @CurrentUser() user: AuthUser) {
     return this.deleteUsersService.execute(this.getUserId(user), query)
+  }
+
+  @Get("heatlh")
+  @Public()
+  healthCheck() {
+    return { status: "ok" }
   }
 
   private getUserId(user: AuthUser): string {
